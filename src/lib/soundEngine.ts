@@ -1,6 +1,6 @@
 /**
- * Web Audio API-based procedural sound engine for Lv. Book.
- * No audio files required – all sounds are synthesized on the fly.
+ * Web Audio API procedural sound engine for Lv. Book.
+ * All sounds synthesized — no audio files required.
  */
 
 type OscType = OscillatorType;
@@ -13,25 +13,20 @@ class SoundEngine {
   private getCtx(): AudioContext | null {
     if (typeof window === 'undefined') return null;
     if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      this.ctx = new (
+        window.AudioContext ||
+        (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      )();
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.6;
+      this.masterGain.gain.value = 0.55;
       this.masterGain.connect(this.ctx.destination);
     }
-    // Resume if suspended (browser autoplay policy)
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
     return this.ctx;
   }
 
-  setEnabled(enabled: boolean) {
-    this.enabled = enabled;
-  }
-
-  isEnabled(): boolean {
-    return this.enabled;
-  }
+  setEnabled(v: boolean) { this.enabled = v; }
+  isEnabled() { return this.enabled; }
 
   private tone(
     freq: number,
@@ -40,145 +35,148 @@ class SoundEngine {
     type: OscType = 'sine',
     volume: number = 0.3,
     attack: number = 0.01,
-    release: number = 0.1
+    release: number = 0.1,
   ) {
     const ctx = this.getCtx();
     if (!ctx || !this.masterGain) return;
-
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = type;
     osc.frequency.setValueAtTime(freq, startTime);
-
     gain.gain.setValueAtTime(0, startTime);
     gain.gain.linearRampToValueAtTime(volume, startTime + attack);
     gain.gain.setValueAtTime(volume, startTime + duration - release);
     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
     osc.connect(gain);
     gain.connect(this.masterGain);
-
     osc.start(startTime);
     osc.stop(startTime + duration + 0.05);
   }
 
-  private noise(startTime: number, duration: number, volume: number = 0.15, filterFreq: number = 800) {
+  private noise(
+    startTime: number,
+    duration: number,
+    volume: number = 0.15,
+    filterFreq: number = 800,
+  ) {
     const ctx = this.getCtx();
     if (!ctx || !this.masterGain) return;
-
     const bufferSize = Math.ceil(ctx.sampleRate * duration);
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1);
-    }
-
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
     const source = ctx.createBufferSource();
     source.buffer = buffer;
-
     const filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
     filter.frequency.value = filterFreq;
     filter.Q.value = 3;
-
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(volume, startTime);
     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
     source.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
-
     source.start(startTime);
   }
 
-  // ── Writing Sound ─────────────────────────────────────────────────────────
-  /** Short scratchy noise burst –羊皮紙にペンで書く音 */
+  // ── Writing noise ─────────────────────────────────────────────────────────
   playWriting() {
     if (!this.enabled) return;
-    const ctx = this.getCtx();
-    if (!ctx) return;
+    const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
     this.noise(t, 0.06, 0.12, 1200);
     this.noise(t + 0.07, 0.05, 0.08, 1500);
     this.noise(t + 0.13, 0.04, 0.07, 1000);
   }
 
-  // ── Quest Start ───────────────────────────────────────────────────────────
-  /** Short ascending horn call – クエスト開始 */
-  playQuestStart() {
+  // ── Retro cursor/click ────────────────────────────────────────────────────
+  /** Single soft click for UI buttons */
+  playClick() {
     if (!this.enabled) return;
-    const ctx = this.getCtx();
-    if (!ctx) return;
+    const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    // C4 - E4 - G4 on square (horn-like)
-    this.tone(261.63, t,        0.18, 'square', 0.22, 0.01, 0.08);
-    this.tone(329.63, t + 0.18, 0.18, 'square', 0.22, 0.01, 0.08);
-    this.tone(392.00, t + 0.36, 0.30, 'square', 0.25, 0.01, 0.15);
+    this.tone(880, t, 0.05, 'sine', 0.12, 0.003, 0.04);
   }
 
-  // ── Quest Complete ────────────────────────────────────────────────────────
-  /** Bell-like ascending chime – 試練完了 */
+  // ── DQ-style popo selection ───────────────────────────────────────────────
+  /** Two-note retro selection blip for menu/card selection */
+  playSelect() {
+    if (!this.enabled) return;
+    const ctx = this.getCtx(); if (!ctx) return;
+    const t = ctx.currentTime;
+    this.tone(880,  t,        0.045, 'square', 0.14, 0.002, 0.025);
+    this.tone(1174, t + 0.06, 0.045, 'square', 0.14, 0.002, 0.025);
+  }
+
+  // ── Menu open ────────────────────────────────────────────────────────────
+  playMenuOpen() {
+    if (!this.enabled) return;
+    const ctx = this.getCtx(); if (!ctx) return;
+    const t = ctx.currentTime;
+    this.tone(587, t,        0.07, 'square', 0.13, 0.003, 0.04);
+    this.tone(784, t + 0.08, 0.07, 'square', 0.13, 0.003, 0.04);
+  }
+
+  // ── Adventure start jingle (heavier) ─────────────────────────────────────
+  /** Full dramatic quest-start fanfare */
+  playQuestStart() {
+    if (!this.enabled) return;
+    const ctx = this.getCtx(); if (!ctx) return;
+    const t = ctx.currentTime;
+    // Drum hit
+    this.noise(t, 0.12, 0.35, 120);
+    this.tone(80, t, 0.12, 'sine', 0.35, 0.001, 0.08);
+    // Horn sequence: C4 E4 G4 C5
+    this.tone(261.63, t + 0.15, 0.15, 'square', 0.20, 0.01, 0.06);
+    this.tone(329.63, t + 0.31, 0.15, 'square', 0.20, 0.01, 0.06);
+    this.tone(392.00, t + 0.47, 0.15, 'square', 0.22, 0.01, 0.06);
+    this.tone(523.25, t + 0.63, 0.30, 'square', 0.25, 0.01, 0.12);
+    // Harmony
+    this.tone(196.00, t + 0.47, 0.46, 'triangle', 0.10, 0.02, 0.15);
+    this.tone(261.63, t + 0.47, 0.46, 'triangle', 0.08, 0.02, 0.15);
+  }
+
+  // ── Quest complete chime ──────────────────────────────────────────────────
   playQuestComplete() {
     if (!this.enabled) return;
-    const ctx = this.getCtx();
-    if (!ctx) return;
+    const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+    const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((freq, i) => {
-      this.tone(freq, t + i * 0.14, 0.7, 'sine', 0.28, 0.005, 0.5);
-      // Subtle harmonic
+      this.tone(freq, t + i * 0.14, 0.7, 'sine', 0.27, 0.005, 0.5);
       this.tone(freq * 2, t + i * 0.14, 0.4, 'sine', 0.06, 0.005, 0.3);
     });
   }
 
-  // ── Level Up Fanfare ──────────────────────────────────────────────────────
-  /** Triumphant fanfare – レベルアップ */
+  // ── Level-up fanfare ──────────────────────────────────────────────────────
   playLevelUp() {
     if (!this.enabled) return;
-    const ctx = this.getCtx();
-    if (!ctx) return;
+    const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    const sequence = [
-      // [freq, startOffset, duration, type, volume]
-      [261.63, 0.00, 0.12, 'triangle', 0.30],
-      [329.63, 0.12, 0.12, 'triangle', 0.30],
-      [392.00, 0.24, 0.12, 'triangle', 0.30],
-      [523.25, 0.36, 0.20, 'triangle', 0.35],
-      [392.00, 0.56, 0.10, 'triangle', 0.25],
-      [523.25, 0.66, 0.10, 'triangle', 0.25],
-      [659.25, 0.76, 0.10, 'triangle', 0.28],
-      [783.99, 0.86, 0.40, 'triangle', 0.32],
-      [1046.50,1.00, 0.60, 'sine',     0.35],
+    const seq = [
+      [261.63, 0.00, 0.11, 'triangle', 0.28],
+      [329.63, 0.11, 0.11, 'triangle', 0.28],
+      [392.00, 0.22, 0.11, 'triangle', 0.28],
+      [523.25, 0.33, 0.18, 'triangle', 0.32],
+      [392.00, 0.51, 0.09, 'triangle', 0.24],
+      [523.25, 0.60, 0.09, 'triangle', 0.24],
+      [659.25, 0.69, 0.09, 'triangle', 0.27],
+      [783.99, 0.78, 0.36, 'triangle', 0.30],
+      [1046.50,0.90, 0.60, 'sine',     0.33],
     ] as const;
-
-    sequence.forEach(([freq, offset, dur, type, vol]) => {
-      this.tone(freq, t + offset, dur, type as OscType, vol, 0.01, 0.08);
-    });
-
-    // Chord underneath
-    [261.63, 329.63, 392.00].forEach(freq => {
-      this.tone(freq, t + 0.36, 0.80, 'sine', 0.10, 0.02, 0.4);
-    });
+    seq.forEach(([freq, offset, dur, type, vol]) =>
+      this.tone(freq, t + offset, dur, type as OscType, vol, 0.01, 0.08)
+    );
+    [261.63, 329.63, 392.00].forEach(f =>
+      this.tone(f, t + 0.33, 0.80, 'sine', 0.09, 0.02, 0.4)
+    );
   }
 
-  // ── Click / Select ────────────────────────────────────────────────────────
-  /** Soft click for UI interactions */
-  playClick() {
-    if (!this.enabled) return;
-    const ctx = this.getCtx();
-    if (!ctx) return;
-    const t = ctx.currentTime;
-    this.tone(880, t, 0.06, 'sine', 0.15, 0.005, 0.04);
-  }
-
-  // ── Success Stamp ─────────────────────────────────────────────────────────
-  /** Heavy stamp sound for SUCCESS overlay */
+  // ── Stamp thud ───────────────────────────────────────────────────────────
   playStamp() {
     if (!this.enabled) return;
-    const ctx = this.getCtx();
-    if (!ctx) return;
+    const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
     this.noise(t, 0.08, 0.35, 200);
     this.tone(80, t, 0.15, 'sine', 0.4, 0.001, 0.12);
@@ -186,6 +184,5 @@ class SoundEngine {
   }
 }
 
-// Singleton instance
 const soundEngine = new SoundEngine();
 export default soundEngine;

@@ -8,18 +8,15 @@ import React, {
   useCallback,
   type ReactNode,
 } from 'react';
-import type { GameData, ActiveQuest, QuestResult, Screen, StatItem, Difficulty } from '@/types/game';
+import type {
+  GameData, ActiveQuest, QuestResult, Screen,
+  StatItem, Difficulty, PresetQuest,
+} from '@/types/game';
 import {
-  loadGameData,
-  saveGameData,
-  clearGameData,
-  INITIAL_GAME_DATA,
+  loadGameData, saveGameData, clearGameData, INITIAL_GAME_DATA,
 } from '@/lib/storage';
 import {
-  calculateXP,
-  getLevelFromXP,
-  generateId,
-  formatDateTime,
+  calculateXP, getLevelFromXP, generateId,
 } from '@/lib/gameLogic';
 import soundEngine from '@/lib/soundEngine';
 
@@ -52,6 +49,8 @@ type Action =
   | { type: 'DISMISS_LEVEL_UP' }
   | { type: 'UPDATE_USER_NAME'; payload: string }
   | { type: 'UPDATE_STATS'; payload: StatItem[] }
+  | { type: 'ADD_PRESET_QUEST'; payload: PresetQuest }
+  | { type: 'DELETE_PRESET_QUEST'; payload: string }
   | { type: 'TOGGLE_SOUND' }
   | { type: 'CLEAR_DATA' };
 
@@ -59,10 +58,8 @@ function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'LOAD': {
       const data = action.payload;
-      const screen: Screen = data.isFirstLaunch ? 'prologue' : 'main';
-      return { ...state, data, screen, isLoaded: true };
+      return { ...state, data, screen: data.isFirstLaunch ? 'prologue' : 'main', isLoaded: true };
     }
-
     case 'SET_SCREEN':
       return { ...state, screen: action.payload };
 
@@ -73,44 +70,37 @@ function reducer(state: GameState, action: Action): GameState {
         isFirstLaunch: false,
         userName,
         stats,
-        logEntries: [
-          {
-            id: generateId(),
-            type: 'quest_complete',
-            message: `「${userName}」の冒険が始まった！`,
-            timestamp: new Date().toISOString(),
-          },
-        ],
+        logEntries: [{
+          id: generateId(),
+          type: 'quest_complete',
+          message: `「${userName}」の冒険が始まった！`,
+          timestamp: new Date().toISOString(),
+        }],
       };
       return { ...state, data: newData, screen: 'main' };
     }
 
-    case 'START_QUEST': {
+    case 'START_QUEST':
       return { ...state, activeQuest: action.payload, screen: 'timer' };
-    }
 
     case 'COMPLETE_QUEST': {
       const result = action.payload;
       const { quest, xpGained, statXPGained } = result;
 
-      // Update stats
       const updatedStats = state.data.stats.map(s =>
         s.id === quest.statId ? { ...s, xp: s.xp + statXPGained } : s
       );
-
       const newTotalXP = state.data.totalXP + xpGained;
       const newLevel = getLevelFromXP(newTotalXP);
       const didLevelUp = newLevel > state.data.level;
 
-      // Build log entries
       const newLogs = [...state.data.logEntries];
       newLogs.unshift({
         id: generateId(),
         type: 'quest_complete',
-        message: `「${quest.questName}」クエストを完了。${quest.statEnglishName}が ${statXPGained.toFixed(1)} 上がった！`,
+        message: `「${quest.questName}」クエスト完了。${quest.statEnglishName}が ${statXPGained.toFixed(1)} 上がった！`,
         timestamp: new Date().toISOString(),
       });
-
       if (didLevelUp) {
         newLogs.unshift({
           id: generateId(),
@@ -120,7 +110,6 @@ function reducer(state: GameState, action: Action): GameState {
         });
       }
 
-      // Build quest history record
       const record = {
         id: generateId(),
         questName: quest.questName,
@@ -155,13 +144,25 @@ function reducer(state: GameState, action: Action): GameState {
     case 'DISMISS_LEVEL_UP':
       return { ...state, showLevelUp: false };
 
-    case 'UPDATE_USER_NAME': {
-      const newData = { ...state.data, userName: action.payload };
+    case 'UPDATE_USER_NAME':
+      return { ...state, data: { ...state.data, userName: action.payload } };
+
+    case 'UPDATE_STATS':
+      return { ...state, data: { ...state.data, stats: action.payload } };
+
+    case 'ADD_PRESET_QUEST': {
+      const newData = {
+        ...state.data,
+        presetQuests: [...state.data.presetQuests, action.payload],
+      };
       return { ...state, data: newData };
     }
 
-    case 'UPDATE_STATS': {
-      const newData = { ...state.data, stats: action.payload };
+    case 'DELETE_PRESET_QUEST': {
+      const newData = {
+        ...state.data,
+        presetQuests: state.data.presetQuests.filter(q => q.id !== action.payload),
+      };
       return { ...state, data: newData };
     }
 
@@ -191,6 +192,8 @@ interface GameContextValue {
   dismissLevelUp: () => void;
   updateUserName: (name: string) => void;
   updateStats: (stats: StatItem[]) => void;
+  addPresetQuest: (q: PresetQuest) => void;
+  deletePresetQuest: (id: string) => void;
   toggleSound: () => void;
   clearData: () => void;
 }
@@ -200,29 +203,21 @@ const GameContext = createContext<GameContextValue | null>(null);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Load saved data on mount
   useEffect(() => {
     const data = loadGameData();
     dispatch({ type: 'LOAD', payload: data });
     soundEngine.setEnabled(data.soundEnabled);
   }, []);
 
-  // Persist whenever data changes
   useEffect(() => {
-    if (state.isLoaded) {
-      saveGameData(state.data);
-    }
+    if (state.isLoaded) saveGameData(state.data);
   }, [state.data, state.isLoaded]);
 
-  const navigate = useCallback((screen: Screen) => {
-    dispatch({ type: 'SET_SCREEN', payload: screen });
-  }, []);
+  const navigate     = useCallback((s: Screen) => dispatch({ type: 'SET_SCREEN', payload: s }), []);
+  const completePrologue = useCallback((userName: string, stats: StatItem[]) =>
+    dispatch({ type: 'COMPLETE_PROLOGUE', payload: { userName, stats } }), []);
 
-  const completePrologue = useCallback((userName: string, stats: StatItem[]) => {
-    dispatch({ type: 'COMPLETE_PROLOGUE', payload: { userName, stats } });
-  }, []);
-
-  const startQuest = useCallback((quest: ActiveQuest) => {
+  const startQuest   = useCallback((quest: ActiveQuest) => {
     dispatch({ type: 'START_QUEST', payload: quest });
     soundEngine.playQuestStart();
   }, []);
@@ -230,71 +225,42 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const completeQuest = useCallback((focusRate: number) => {
     const { activeQuest, data } = state;
     if (!activeQuest) return;
-
-    const xpGained = calculateXP(
-      activeQuest.difficulty as Difficulty,
-      activeQuest.durationMinutes,
-      focusRate
-    );
-    const statXPGained = xpGained; // 1:1 mapping for now
-
-    const oldLevel = data.level;
+    const xpGained = calculateXP(activeQuest.difficulty as Difficulty, activeQuest.durationMinutes, focusRate);
+    const statXPGained = xpGained;
     const newTotalXP = data.totalXP + xpGained;
-    const newLevel = getLevelFromXP(newTotalXP);
-
+    const newLevel   = getLevelFromXP(newTotalXP);
     const result: QuestResult = {
       quest: activeQuest,
       focusRate,
       xpGained,
       statXPGained,
-      leveledUp: newLevel > oldLevel,
+      leveledUp: newLevel > data.level,
       newLevel,
-      oldLevel,
+      oldLevel: data.level,
     };
-
     dispatch({ type: 'COMPLETE_QUEST', payload: result });
     soundEngine.playQuestComplete();
-
-    if (newLevel > oldLevel) {
-      setTimeout(() => soundEngine.playLevelUp(), 800);
-    }
+    if (newLevel > data.level) setTimeout(() => soundEngine.playLevelUp(), 800);
   }, [state]);
 
-  const dismissLevelUp = useCallback(() => {
-    dispatch({ type: 'DISMISS_LEVEL_UP' });
-  }, []);
+  const dismissLevelUp = useCallback(() => dispatch({ type: 'DISMISS_LEVEL_UP' }), []);
+  const updateUserName = useCallback((n: string) => dispatch({ type: 'UPDATE_USER_NAME', payload: n }), []);
+  const updateStats    = useCallback((s: StatItem[]) => dispatch({ type: 'UPDATE_STATS', payload: s }), []);
 
-  const updateUserName = useCallback((name: string) => {
-    dispatch({ type: 'UPDATE_USER_NAME', payload: name });
-  }, []);
+  const addPresetQuest = useCallback((q: PresetQuest) =>
+    dispatch({ type: 'ADD_PRESET_QUEST', payload: q }), []);
+  const deletePresetQuest = useCallback((id: string) =>
+    dispatch({ type: 'DELETE_PRESET_QUEST', payload: id }), []);
 
-  const updateStats = useCallback((stats: StatItem[]) => {
-    dispatch({ type: 'UPDATE_STATS', payload: stats });
-  }, []);
-
-  const toggleSound = useCallback(() => {
-    dispatch({ type: 'TOGGLE_SOUND' });
-  }, []);
-
-  const clearData = useCallback(() => {
-    dispatch({ type: 'CLEAR_DATA' });
-  }, []);
+  const toggleSound = useCallback(() => dispatch({ type: 'TOGGLE_SOUND' }), []);
+  const clearData   = useCallback(() => dispatch({ type: 'CLEAR_DATA' }), []);
 
   return (
-    <GameContext.Provider
-      value={{
-        state,
-        navigate,
-        completePrologue,
-        startQuest,
-        completeQuest,
-        dismissLevelUp,
-        updateUserName,
-        updateStats,
-        toggleSound,
-        clearData,
-      }}
-    >
+    <GameContext.Provider value={{
+      state, navigate, completePrologue, startQuest, completeQuest,
+      dismissLevelUp, updateUserName, updateStats,
+      addPresetQuest, deletePresetQuest, toggleSound, clearData,
+    }}>
       {children}
     </GameContext.Provider>
   );

@@ -1,5 +1,13 @@
 export type Difficulty = 'Easy' | 'Normal' | 'Hard';
-export type Screen = 'prologue' | 'main' | 'quest' | 'timer' | 'result' | 'timeline' | 'settings';
+export type Screen =
+  | 'prologue'
+  | 'main'
+  | 'tavern'
+  | 'questCreate'
+  | 'timer'
+  | 'result'
+  | 'timeline'
+  | 'settings';
 export type LogType = 'quest_complete' | 'level_up' | 'stat_up';
 
 export interface StatItem {
@@ -8,6 +16,16 @@ export interface StatItem {
   japaneseDescription: string;
   xp: number;
   color: string;
+}
+
+/** A saved preset quest in the Tavern */
+export interface PresetQuest {
+  id: string;
+  name: string;
+  statId: string;
+  difficulty: Difficulty;
+  durationMinutes: number;
+  createdAt: string;
 }
 
 export interface QuestRecord {
@@ -19,14 +37,14 @@ export interface QuestRecord {
   durationMinutes: number;
   focusRate: number;
   xpGained: number;
-  completedAt: string; // ISO string
+  completedAt: string;
 }
 
 export interface LogEntry {
   id: string;
   type: LogType;
   message: string;
-  timestamp: string; // ISO string
+  timestamp: string;
 }
 
 export interface GameData {
@@ -35,6 +53,7 @@ export interface GameData {
   level: number;
   totalXP: number;
   stats: StatItem[];
+  presetQuests: PresetQuest[];
   questHistory: QuestRecord[];
   logEntries: LogEntry[];
   soundEnabled: boolean;
@@ -46,7 +65,7 @@ export interface ActiveQuest {
   statEnglishName: string;
   difficulty: Difficulty;
   durationMinutes: number;
-  startedAt: number; // Date.now()
+  startedAt: number;
 }
 
 export interface QuestResult {

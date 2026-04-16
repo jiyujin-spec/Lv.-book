@@ -1,175 +1,127 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import type { StatItem } from '@/types/game';
 import { computePolygonPoints, computeGridPoints } from '@/lib/gameLogic';
 
 interface RadarChartProps {
   stats: StatItem[];
-  size?: number;
+  /**
+   * The SVG viewBox size (virtual pixels).
+   * The element will render with width=100% / height=auto, so it always
+   * fills the parent container while maintaining aspect ratio.
+   */
+  vbSize?: number;
   animate?: boolean;
 }
 
-export default function RadarChart({ stats, size = 220, animate = true }: RadarChartProps) {
-  const polygonRef = useRef<SVGPolygonElement>(null);
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = (size / 2) * 0.72;
-  const n = stats.length;
+export default function RadarChart({ stats, vbSize = 260, animate = true }: RadarChartProps) {
+  const cx = vbSize / 2;
+  const cy = vbSize / 2;
+  const r  = (vbSize / 2) * 0.68;
+  const n  = stats.length;
 
-  // Compute normalized values (0.02 minimum so zero stats are visible)
+  // Normalise: highest stat = 1.0, zero stats = 0.03 (visible)
   const maxXP = Math.max(...stats.map(s => s.xp), 1);
-  const values = stats.map(s => Math.max(0.02, s.xp / maxXP));
+  const values = stats.map(s => Math.max(0.03, s.xp / maxXP));
 
   const dataPoints = computePolygonPoints(cx, cy, r, values);
-
-  // Grid rings at 25%, 50%, 75%, 100%
   const gridLevels = [0.25, 0.5, 0.75, 1.0];
 
-  // Axis endpoint labels
-  const axisPoints = stats.map((_, i) => {
+  // Label positions (outside the radar)
+  const labelPts = stats.map((_, i) => {
     const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
     return {
-      x: cx + (r + 22) * Math.cos(angle),
-      y: cy + (r + 22) * Math.sin(angle),
+      x: cx + (r + 28) * Math.cos(angle),
+      y: cy + (r + 28) * Math.sin(angle),
     };
   });
 
-  // Tick marks on axes
-  const axisTicks = stats.map((_, i) => {
+  // Axis lines
+  const axes = stats.map((_, i) => {
     const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
-    return {
-      x1: cx,
-      y1: cy,
-      x2: cx + r * Math.cos(angle),
-      y2: cy + r * Math.sin(angle),
-    };
+    return { x2: cx + r * Math.cos(angle), y2: cy + r * Math.sin(angle) };
   });
 
-  // Gradient color: blend between stat colors
-  const gradientId = `radar-gradient-${stats.map(s => s.id).join('-')}`;
+  const gradId = 'rg';
 
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      className={animate ? 'animate-chart-grow' : ''}
+      viewBox={`0 0 ${vbSize} ${vbSize}`}
+      style={{ width: '100%', height: 'auto', display: 'block' }}
+      className={animate ? 'animate-fade-in-up' : ''}
     >
       <defs>
-        {/* Radial gradient for fill */}
-        <radialGradient id={gradientId} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#c084fc" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#7b2d8b" stopOpacity="0.2" />
+        <radialGradient id={gradId} cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="#60a0ff" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#1850c0" stopOpacity="0.15" />
         </radialGradient>
-        <filter id="glow-filter">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2.5" result="b" />
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
 
       {/* Grid rings */}
-      {gridLevels.map((level, i) => (
+      {gridLevels.map((v, i) => (
         <polygon
           key={i}
-          points={computeGridPoints(cx, cy, r, n, level)}
+          points={computeGridPoints(cx, cy, r, n, v)}
           fill="none"
-          stroke={level === 1.0 ? '#d4a017' : '#4a3870'}
-          strokeWidth={level === 1.0 ? 1.5 : 0.8}
-          strokeOpacity={level === 1.0 ? 0.7 : 0.4}
-          strokeDasharray={level < 1.0 ? '3 3' : undefined}
+          stroke={v === 1.0 ? '#b8cce0' : '#1e3050'}
+          strokeWidth={v === 1.0 ? 1.2 : 0.7}
+          strokeOpacity={v === 1.0 ? 0.6 : 0.5}
+          strokeDasharray={v < 1.0 ? '4 3' : undefined}
         />
       ))}
-
-      {/* Center point */}
-      <circle cx={cx} cy={cy} r={2} fill="#4a3870" />
 
       {/* Axis lines */}
-      {axisTicks.map((tick, i) => (
-        <line
-          key={i}
-          x1={tick.x1}
-          y1={tick.y1}
-          x2={tick.x2}
-          y2={tick.y2}
-          stroke="#4a3870"
-          strokeWidth={0.8}
-          strokeOpacity={0.5}
-        />
+      {axes.map((a, i) => (
+        <line key={i} x1={cx} y1={cy} x2={a.x2} y2={a.y2}
+          stroke="#1e3050" strokeWidth={0.7} strokeOpacity={0.6} />
       ))}
+      <circle cx={cx} cy={cy} r={2.5} fill="#1e3050" />
 
-      {/* Data polygon – shadow */}
-      <polygon
-        points={dataPoints}
-        fill={`url(#${gradientId})`}
-        stroke="#9b59b6"
-        strokeWidth={3}
-        filter="url(#glow-filter)"
-        opacity={0.35}
-      />
+      {/* Fill shadow */}
+      <polygon points={dataPoints} fill={`url(#${gradId})`}
+        stroke="#4080e0" strokeWidth={3} opacity={0.3} filter="url(#glow)" />
 
-      {/* Data polygon – main */}
-      <polygon
-        ref={polygonRef}
-        points={dataPoints}
-        fill={`url(#${gradientId})`}
-        stroke="#c084fc"
-        strokeWidth={2}
-        filter="url(#glow-filter)"
-      />
+      {/* Fill main */}
+      <polygon points={dataPoints} fill={`url(#${gradId})`}
+        stroke="#4080e0" strokeWidth={1.8} filter="url(#glow)" />
 
       {/* Vertex dots */}
       {stats.map((stat, i) => {
         const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
         const v = values[i];
         return (
-          <circle
-            key={stat.id}
+          <circle key={stat.id}
             cx={cx + r * v * Math.cos(angle)}
             cy={cy + r * v * Math.sin(angle)}
-            r={4}
+            r={4.5}
             fill={stat.color}
-            stroke="#1a0f3a"
+            stroke="#07121f"
             strokeWidth={1.5}
-            filter="url(#glow-filter)"
+            filter="url(#glow)"
           />
         );
       })}
 
-      {/* Axis labels */}
+      {/* Labels */}
       {stats.map((stat, i) => {
-        const pt = axisPoints[i];
-        const isLeft = pt.x < cx - 5;
-        const isRight = pt.x > cx + 5;
-        const textAnchor = isLeft ? 'end' : isRight ? 'start' : 'middle';
-
+        const pt = labelPts[i];
+        const isLeft  = pt.x < cx - 8;
+        const isRight = pt.x > cx + 8;
+        const anchor  = isLeft ? 'end' : isRight ? 'start' : 'middle';
         return (
           <g key={stat.id}>
-            {/* English name */}
-            <text
-              x={pt.x}
-              y={pt.y - 2}
-              textAnchor={textAnchor}
-              fill="#f0c040"
-              fontSize={10}
-              fontFamily="Cinzel, serif"
-              fontWeight="700"
-              letterSpacing="0.05em"
-            >
+            <text x={pt.x} y={pt.y - 2} textAnchor={anchor}
+              fill="#f0c030" fontSize={11}
+              fontFamily="Cinzel, serif" fontWeight="700" letterSpacing="0.04em">
               {stat.englishName}
             </text>
-            {/* Japanese description */}
-            <text
-              x={pt.x}
-              y={pt.y + 10}
-              textAnchor={textAnchor}
-              fill="#d4c49c"
-              fontSize={8}
-              fontFamily="sans-serif"
-            >
+            <text x={pt.x} y={pt.y + 11} textAnchor={anchor}
+              fill="#7090b0" fontSize={8.5} fontFamily="sans-serif">
               {stat.japaneseDescription}
             </text>
           </g>

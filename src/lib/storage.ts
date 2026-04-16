@@ -9,6 +9,7 @@ export const INITIAL_GAME_DATA: GameData = {
   level: 1,
   totalXP: 0,
   stats: DEFAULT_STATS,
+  presetQuests: [],
   questHistory: [],
   logEntries: [],
   soundEnabled: true,
@@ -20,11 +21,10 @@ export function loadGameData(): GameData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...INITIAL_GAME_DATA };
     const parsed = JSON.parse(raw) as GameData;
-    // Ensure all default stats exist (in case new stats were added)
     return {
       ...INITIAL_GAME_DATA,
       ...parsed,
-      // Recompute level from stored XP for consistency
+      presetQuests: parsed.presetQuests ?? [],
       level: getLevelFromXP(parsed.totalXP ?? 0),
     };
   } catch {
@@ -36,9 +36,7 @@ export function saveGameData(data: GameData): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // Silently fail (e.g., storage quota exceeded)
-  }
+  } catch { /* quota exceeded — ignore */ }
 }
 
 export function clearGameData(): void {

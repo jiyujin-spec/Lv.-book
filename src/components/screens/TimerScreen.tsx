@@ -1,182 +1,166 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { DIFFICULTY_COLORS } from '@/lib/gameLogic';
 import { useGame } from '@/contexts/GameContext';
 import ParticleEffect from '../ParticleEffect';
+import DQWindow from '../DQWindow';
 
 export default function TimerScreen() {
   const { state, navigate } = useGame();
   const { activeQuest } = state;
 
-  const [remaining, setRemaining] = useState<number>(0); // seconds
-  const [elapsed, setElapsed] = useState<number>(0); // seconds
+  const [remaining, setRemaining] = useState(0);
+  const [elapsed,   setElapsed]   = useState(0);
   const [showAbandon, setShowAbandon] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const [isComplete,  setIsComplete]  = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const totalSeconds = (activeQuest?.durationMinutes ?? 0) * 60;
 
-  // Initialize timer from stored start time (so it survives re-renders)
   useEffect(() => {
     if (!activeQuest) return;
 
     function tick() {
       const now = Date.now();
-      const elapsedMs = now - activeQuest!.startedAt;
-      const elapsedSec = Math.floor(elapsedMs / 1000);
+      const elapsedSec = Math.floor((now - activeQuest!.startedAt) / 1000);
       const rem = Math.max(0, totalSeconds - elapsedSec);
       setElapsed(elapsedSec);
       setRemaining(rem);
-
       if (rem === 0) {
         clearInterval(intervalRef.current!);
         setIsComplete(true);
       }
     }
 
-    tick(); // run immediately
+    tick();
     intervalRef.current = setInterval(tick, 500);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [activeQuest, totalSeconds]);
 
-  // Auto-navigate to result when timer hits 0 (focus rate chosen on result screen)
+  // Smooth transition to result after completion
   useEffect(() => {
-    if (isComplete) {
-      const t = setTimeout(() => {
-        navigate('result');
-      }, 1200);
-      return () => clearTimeout(t);
-    }
+    if (!isComplete) return;
+    const t1 = setTimeout(() => setTransitioning(true), 1000);
+    const t2 = setTimeout(() => navigate('result'), 1600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [isComplete, navigate]);
 
   if (!activeQuest) return null;
 
-  const progress = Math.min(1, elapsed / totalSeconds);
-  const remainingMins = Math.floor(remaining / 60);
-  const remainingSecs = remaining % 60;
-  const diffColor = DIFFICULTY_COLORS[activeQuest.difficulty];
+  const progress    = Math.min(1, elapsed / totalSeconds);
+  const remMins     = Math.floor(remaining / 60);
+  const remSecs     = remaining % 60;
+  const diffColor   = DIFFICULTY_COLORS[activeQuest.difficulty];
+  const stat        = state.data.stats.find(s => s.id === activeQuest.statId);
 
-  // SVG arc progress
-  const R = 120;
-  const circ = 2 * Math.PI * R;
-  const dashOffset = circ * (1 - progress);
+  // SVG arc
+  const R      = 110;
+  const circ   = 2 * Math.PI * R;
+  const offset = circ * (1 - progress);
 
-  function handleAbandon() {
-    if (!showAbandon) {
-      setShowAbandon(true);
-      return;
-    }
+  function handleAbandonClick() {
+    if (!showAbandon) { setShowAbandon(true); return; }
     if (intervalRef.current) clearInterval(intervalRef.current);
-    navigate('quest');
+    navigate('tavern');
   }
 
   return (
     <div
       className="fixed inset-0 flex flex-col items-center justify-between overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 50% 40%, #1a0820 0%, #070412 70%)' }}
+      style={{
+        background: '#04091a',
+        opacity: transitioning ? 0 : 1,
+        transition: 'opacity 0.5s ease',
+      }}
     >
-      <ParticleEffect count={20} />
+      <ParticleEffect count={15} />
 
-      {/* ── Top: Quest Info ── */}
-      <div className="relative z-10 w-full text-center px-6 pt-safe-top pt-8">
-        <p
-          className="text-xs font-cinzel tracking-[0.4em] mb-2"
-          style={{ color: diffColor, opacity: 0.9 }}
-        >
-          ✦ {activeQuest.difficulty.toUpperCase()} QUEST ✦
-        </p>
-        <h2
-          className="text-xl font-bold mb-1"
-          style={{ color: '#f4e4bc', fontFamily: 'Georgia, serif' }}
-        >
-          {activeQuest.questName}
-        </h2>
-        <p className="text-sm" style={{ color: '#4a3870' }}>
-          {activeQuest.statEnglishName} · {activeQuest.durationMinutes}分
-        </p>
+      {/* ── Quest info (top) ── */}
+      <div className="relative z-10 w-full px-5 pt-safe pt-8">
+        <DQWindow>
+          {/* Quest name */}
+          <div className="text-center mb-2">
+            <p className="font-cinzel text-xs mb-1" style={{ color: diffColor, letterSpacing: '0.3em' }}>
+              ✦ {activeQuest.difficulty.toUpperCase()} QUEST ✦
+            </p>
+            <h2 className="text-lg font-bold" style={{ color: '#e8f0f8', fontFamily: 'serif', lineHeight: 1.3 }}>
+              {activeQuest.questName}
+            </h2>
+          </div>
+
+          {/* Stat badge */}
+          <div className="flex items-center justify-center gap-3 mt-1">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-sm"
+              style={{ background: `${stat?.color ?? '#4080e0'}15`, border: `1px solid ${stat?.color ?? '#4080e0'}40` }}>
+              <div className="w-2 h-2 rounded-full"
+                style={{ background: stat?.color ?? '#4080e0', boxShadow: `0 0 5px ${stat?.color ?? '#4080e0'}` }}
+              />
+              <span className="font-cinzel text-xs font-bold" style={{ color: stat?.color ?? '#4080e0' }}>
+                {activeQuest.statEnglishName}
+              </span>
+            </div>
+            <span className="text-xs" style={{ color: '#4a6080' }}>
+              {activeQuest.durationMinutes}分の試練
+            </span>
+          </div>
+        </DQWindow>
       </div>
 
-      {/* ── Center: Timer Circle ── */}
-      <div className="relative z-10 flex flex-col items-center justify-center flex-1">
-        <div className="relative flex items-center justify-center" style={{ width: 280, height: 280 }}>
-          {/* Background glow */}
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: 260,
-              height: 260,
-              background: `radial-gradient(circle, ${diffColor}08 0%, transparent 70%)`,
-              boxShadow: `0 0 60px ${diffColor}15`,
-            }}
-          />
+      {/* ── Timer circle ── */}
+      <div className="relative z-10 flex flex-col items-center">
+        <div className="relative flex items-center justify-center" style={{ width: 260, height: 260 }}>
+          {/* Glow bg */}
+          <div className="absolute rounded-full" style={{
+            width: 240, height: 240,
+            background: `radial-gradient(circle, ${diffColor}06 0%, transparent 70%)`,
+            boxShadow: `0 0 50px ${diffColor}12`,
+          }} />
 
-          {/* SVG circle progress */}
-          <svg
-            width={280}
-            height={280}
-            className="absolute"
-            style={{ transform: 'rotate(-90deg)' }}
-          >
-            {/* Track */}
-            <circle
-              cx={140} cy={140} r={R}
+          {/* DQ-style window ring */}
+          <div className="absolute rounded-full" style={{
+            width: 250, height: 250,
+            border: '2px solid rgba(184,204,224,0.15)',
+          }} />
+
+          {/* Arc SVG */}
+          <svg width={260} height={260} className="absolute" style={{ transform: 'rotate(-90deg)' }}>
+            <circle cx={130} cy={130} r={R}
+              fill="none" stroke="rgba(30,48,80,0.6)" strokeWidth={8} />
+            <circle cx={130} cy={130} r={R}
               fill="none"
-              stroke="rgba(74,56,112,0.3)"
-              strokeWidth={8}
-            />
-            {/* Progress arc */}
-            <circle
-              cx={140} cy={140} r={R}
-              fill="none"
-              stroke={isComplete ? '#ffd700' : diffColor}
-              strokeWidth={8}
-              strokeLinecap="round"
+              stroke={isComplete ? '#f0c030' : diffColor}
+              strokeWidth={8} strokeLinecap="round"
               strokeDasharray={circ}
-              strokeDashoffset={dashOffset}
-              style={{ transition: 'stroke-dashoffset 0.5s linear, stroke 0.3s' }}
-              filter={`drop-shadow(0 0 6px ${isComplete ? '#ffd700' : diffColor})`}
+              strokeDashoffset={offset}
+              style={{ transition: 'stroke-dashoffset 0.5s linear, stroke 0.4s' }}
+              filter={`drop-shadow(0 0 5px ${isComplete ? '#f0c030' : diffColor})`}
             />
           </svg>
 
-          {/* Timer display */}
+          {/* Time display */}
           <div className="relative z-10 text-center">
             {isComplete ? (
               <div className="animate-level-up">
-                <p
-                  className="text-5xl font-bold font-cinzel"
-                  style={{ color: '#ffd700', filter: 'drop-shadow(0 0 12px #ffd700)' }}
-                >
-                  完了
-                </p>
-                <p className="text-xs mt-2 font-cinzel" style={{ color: '#c084fc', letterSpacing: '0.3em' }}>
-                  COMPLETE
+                <p className="font-cinzel text-4xl font-bold" style={{ color: '#f0c030', filter: 'drop-shadow(0 0 10px #f0c030)' }}>
+                  完了！
                 </p>
               </div>
             ) : (
               <>
-                <p
-                  className="text-6xl font-bold font-cinzel tabular-nums"
+                <p className="font-cinzel text-5xl font-bold tabular-nums"
                   style={{
-                    color: remaining < 60 ? diffColor : '#f4e4bc',
-                    filter: remaining < 60 ? `drop-shadow(0 0 10px ${diffColor})` : undefined,
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  {String(remainingMins).padStart(2, '0')}
-                  <span
-                    className="animate-pulse"
-                    style={{ color: '#4a3870', fontSize: '0.8em' }}
-                  >
-                    :
-                  </span>
-                  {String(remainingSecs).padStart(2, '0')}
+                    color: remaining < 60 ? diffColor : '#e8f0f8',
+                    filter: remaining < 60 ? `drop-shadow(0 0 8px ${diffColor})` : undefined,
+                    letterSpacing: '0.04em',
+                  }}>
+                  {String(remMins).padStart(2,'0')}
+                  <span className="animate-dq-cursor" style={{ color: '#2a3a50', fontSize: '0.75em' }}>:</span>
+                  {String(remSecs).padStart(2,'0')}
                 </p>
-                <p className="text-xs mt-2" style={{ color: '#4a3870', letterSpacing: '0.2em' }}>
+                <p className="font-cinzel text-xs mt-1" style={{ color: '#2a3a50', letterSpacing: '0.25em' }}>
                   REMAINING
                 </p>
               </>
@@ -184,85 +168,57 @@ export default function TimerScreen() {
           </div>
         </div>
 
-        {/* Progress text */}
-        <p className="text-sm mt-2" style={{ color: '#4a3870' }}>
+        {/* Progress % */}
+        <p className="text-sm mt-1" style={{ color: '#2a3a50' }}>
           {Math.round(progress * 100)}% 完了
         </p>
 
-        {/* Motivational text */}
+        {/* Motivational quote */}
         {!isComplete && (
-          <div className="mt-6 text-center px-8">
-            {remaining > totalSeconds * 0.5 ? (
-              <p className="text-xs italic" style={{ color: '#3a2a60' }}>
-                &ldquo;一歩ずつ進む勇者の足跡は、永遠に刻まれる&rdquo;
-              </p>
-            ) : remaining > 60 ? (
-              <p className="text-xs italic" style={{ color: '#5a3a70', fontFamily: 'serif' }}>
-                &ldquo;もう少し。諦めるな、勇者よ&rdquo;
-              </p>
-            ) : (
-              <p
-                className="text-xs italic animate-pulse"
-                style={{ color: diffColor }}
-              >
-                &ldquo;ラストスパート！終わりが近い！&rdquo;
-              </p>
-            )}
+          <div className="mt-4 px-8 text-center">
+            {remaining > totalSeconds * 0.5
+              ? <p className="text-xs italic" style={{ color: '#1e3050' }}>&ldquo;一歩ずつ進む者の足跡は、永遠に刻まれる&rdquo;</p>
+              : remaining > 60
+              ? <p className="text-xs italic" style={{ color: '#2a3a50' }}>&ldquo;もう少し。諦めるな、勇者よ&rdquo;</p>
+              : <p className="text-xs italic animate-pulse" style={{ color: diffColor }}>&ldquo;ラストスパート！&rdquo;</p>
+            }
           </div>
         )}
       </div>
 
-      {/* ── Bottom: Abandon Button ── */}
+      {/* ── Abandon section ── */}
       {!isComplete && (
-        <div className="relative z-10 w-full px-6 pb-safe-bottom pb-10">
-          <div
-            className="h-px mb-6"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(74,56,112,0.4), transparent)' }}
-          />
+        <div className="relative z-10 w-full px-5 pb-safe pb-10">
+          <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, rgba(184,204,224,0.15), transparent)' }} />
 
           {showAbandon ? (
-            <div className="text-center space-y-3">
-              <div className="flex items-center justify-center gap-2">
-                <AlertCircle size={16} style={{ color: '#ef4444' }} />
-                <p className="text-sm" style={{ color: '#ef4444' }}>
-                  クエストを諦めますか？XPは得られません。
-                </p>
+            <DQWindow>
+              <div className="flex items-center gap-2 mb-3">
+                <AlertCircle size={15} style={{ color: '#ef4444' }} />
+                <p className="text-sm" style={{ color: '#ef4444' }}>クエストを諦めますか？XPは得られません。</p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowAbandon(false)}
-                  className="flex-1 py-3 rounded-xl text-sm font-cinzel"
-                  style={{
-                    background: 'rgba(26,15,58,0.8)',
-                    border: '1px solid rgba(74,56,112,0.5)',
-                    color: '#c084fc',
-                  }}
+                  className="flex-1 py-3 rounded font-cinzel text-sm"
+                  style={{ background: 'rgba(1,8,16,0.5)', border: '1px solid rgba(184,204,224,0.2)', color: '#7090b0' }}
                 >
                   戻る
                 </button>
                 <button
-                  onClick={handleAbandon}
-                  className="flex-1 py-3 rounded-xl text-sm font-cinzel font-bold"
-                  style={{
-                    background: 'rgba(239,68,68,0.2)',
-                    border: '1px solid rgba(239,68,68,0.5)',
-                    color: '#ef4444',
-                  }}
+                  onClick={handleAbandonClick}
+                  className="flex-1 py-3 rounded font-cinzel text-sm font-bold"
+                  style={{ background: 'rgba(180,40,40,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}
                 >
                   諦める
                 </button>
               </div>
-            </div>
+            </DQWindow>
           ) : (
             <button
-              onClick={handleAbandon}
-              className="w-full py-3 rounded-xl text-xs font-cinzel tracking-widest transition-all"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(74,56,112,0.3)',
-                color: '#2d1b4e',
-                letterSpacing: '0.2em',
-              }}
+              onClick={handleAbandonClick}
+              className="w-full py-3 rounded font-cinzel text-xs tracking-widest transition-all"
+              style={{ background: 'transparent', border: '1px solid rgba(30,48,80,0.5)', color: '#1e3050' }}
             >
               クエストを諦める
             </button>
