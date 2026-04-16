@@ -1,0 +1,22 @@
+{
+  "name": "Lv. Book",
+  "short_name": "Lv. Book",
+  "description": "日々の努力をRPGとして楽しむ自己成長アプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0820",
+  "theme_color": "#0d0820",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
