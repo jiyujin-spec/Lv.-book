@@ -15,10 +15,11 @@ interface Particle {
   twinkle: number;
 }
 
+// Warm grimoire palette — no purple or bright blue
 const COLORS = [
-  '#ffd700', '#f0c040', '#d4a017',
-  '#c084fc', '#7b2d8b',
-  '#ffffff',
+  '#c4a35a', '#a88040', '#8b7a50',
+  '#d4a854', '#6b5d3f',
+  '#d4cfc0',
 ];
 
 interface ParticleEffectProps {
@@ -26,7 +27,7 @@ interface ParticleEffectProps {
   className?: string;
 }
 
-/** Ambient floating particle background for void/magical atmosphere. */
+/** Ambient floating particle background — warm ember/dust atmosphere. */
 export default function ParticleEffect({ count = 40, className = '' }: ParticleEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -45,7 +46,6 @@ export default function ParticleEffect({ count = 40, className = '' }: ParticleE
     resize();
     window.addEventListener('resize', resize);
 
-    // Init particles
     particlesRef.current = Array.from({ length: count }, () => spawnParticle(canvas));
 
     function spawnParticle(c: HTMLCanvasElement, atBottom = false): Particle {
@@ -54,8 +54,8 @@ export default function ParticleEffect({ count = 40, className = '' }: ParticleE
         y: atBottom ? c.height + 5 : Math.random() * c.height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: -(Math.random() * 0.4 + 0.2),
-        size: Math.random() * 2 + 1,
-        opacity: Math.random() * 0.6 + 0.2,
+        size: Math.random() * 2 + 0.8,
+        opacity: Math.random() * 0.4 + 0.1,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         life: Math.random() * 200,
         maxLife: Math.random() * 200 + 100,
@@ -86,7 +86,7 @@ export default function ParticleEffect({ count = 40, className = '' }: ParticleE
         ctx.globalAlpha = Math.max(0, twinkleAlpha);
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 4;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
@@ -156,12 +156,11 @@ export function GoldBurst({ active, onComplete }: GoldBurstProps) {
         vy: Math.sin(angle) * speed,
         size: Math.random() * 4 + 1,
         opacity: 1,
-        color: ['#ffd700', '#f0c040', '#fff8dc', '#c084fc'][Math.floor(Math.random() * 4)],
+        color: ['#c4a35a', '#d4a854', '#8b7a50', '#a88040'][Math.floor(Math.random() * 4)],
         life: 0,
       };
     });
 
-    let frame = 0;
     function animate() {
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -170,7 +169,7 @@ export function GoldBurst({ active, onComplete }: GoldBurstProps) {
       for (const p of burst) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.15; // gravity
+        p.vy += 0.15;
         p.vx *= 0.98;
         p.life += 1;
         p.opacity = Math.max(0, 1 - p.life / 60);
@@ -181,7 +180,7 @@ export function GoldBurst({ active, onComplete }: GoldBurstProps) {
           ctx.globalAlpha = p.opacity;
           ctx.fillStyle = p.color;
           ctx.shadowColor = p.color;
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = 6;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           ctx.fill();
@@ -189,7 +188,6 @@ export function GoldBurst({ active, onComplete }: GoldBurstProps) {
         }
       }
 
-      frame++;
       if (alive) {
         rafRef.current = requestAnimationFrame(animate);
       } else {

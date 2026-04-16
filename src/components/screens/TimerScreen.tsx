@@ -11,10 +11,10 @@ export default function TimerScreen() {
   const { state, navigate, stopTimer } = useGame();
   const { activeQuest } = state;
 
-  const [elapsed,     setElapsed]     = useState(0);       // seconds
-  const [showStop,    setShowStop]    = useState(false);   // "stop and go to result" confirm
-  const [showAbandon, setShowAbandon] = useState(false);   // "abandon" confirm
-  const [stopping,    setStopping]    = useState(false);   // fade-out before navigate
+  const [elapsed,     setElapsed]     = useState(0);
+  const [showStop,    setShowStop]    = useState(false);
+  const [showAbandon, setShowAbandon] = useState(false);
+  const [stopping,    setStopping]    = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -35,18 +35,15 @@ export default function TimerScreen() {
   const diffColor = DIFFICULTY_COLORS[activeQuest.difficulty];
   const stat      = state.data.stats.find(s => s.id === activeQuest.statId);
 
-  // Arc: 1 full rotation per hour (3600 s)
   const R      = 110;
   const circ   = 2 * Math.PI * R;
   const arcProgress = (elapsed % 3600) / 3600;
   const offset = circ * (1 - arcProgress);
 
-  // Elapsed display
   const timeDisplay = formatElapsedTime(elapsed);
 
   function handleStopClick() {
     if (!showStop) { setShowStop(true); return; }
-    // Commit stop: record stoppedAt, then fade-out → result
     if (intervalRef.current) clearInterval(intervalRef.current);
     stopTimer();
     setStopping(true);
@@ -59,7 +56,6 @@ export default function TimerScreen() {
     navigate('tavern');
   }
 
-  // Motivational text based on elapsed time
   const quote = elapsed < 5 * 60
     ? '一歩ずつ進む者の足跡は、永遠に刻まれる'
     : elapsed < 20 * 60
@@ -72,7 +68,7 @@ export default function TimerScreen() {
     <div
       className="fixed inset-0 flex flex-col items-center justify-between overflow-hidden"
       style={{
-        background: '#04091a',
+        background: '#0d0b08',
         opacity: stopping ? 0 : 1,
         transition: stopping ? 'opacity 0.5s ease' : 'none',
       }}
@@ -86,7 +82,7 @@ export default function TimerScreen() {
             <p className="font-cinzel text-xs mb-1" style={{ color: diffColor, letterSpacing: '0.3em' }}>
               ✦ {activeQuest.difficulty.toUpperCase()} QUEST · 時間形式 ✦
             </p>
-            <h2 className="text-lg font-bold" style={{ color: '#e8f0f8', fontFamily: 'serif', lineHeight: 1.3 }}>
+            <h2 className="text-lg font-bold" style={{ color: '#d4cfc0', fontFamily: 'serif', lineHeight: 1.3 }}>
               {activeQuest.questName}
             </h2>
           </div>
@@ -94,17 +90,17 @@ export default function TimerScreen() {
           <div className="flex items-center justify-center gap-3 mt-1">
             <div
               className="flex items-center gap-2 px-3 py-1 rounded-sm"
-              style={{ background: `${stat?.color ?? '#4080e0'}15`, border: `1px solid ${stat?.color ?? '#4080e0'}40` }}
+              style={{ background: `${stat?.color ?? '#a88040'}15`, border: `1px solid ${stat?.color ?? '#a88040'}40` }}
             >
               <div
                 className="w-2 h-2 rounded-full"
-                style={{ background: stat?.color ?? '#4080e0', boxShadow: `0 0 5px ${stat?.color ?? '#4080e0'}` }}
+                style={{ background: stat?.color ?? '#a88040', boxShadow: `0 0 4px ${stat?.color ?? '#a88040'}` }}
               />
-              <span className="font-cinzel text-xs font-bold" style={{ color: stat?.color ?? '#4080e0' }}>
+              <span className="font-cinzel text-xs font-bold" style={{ color: stat?.color ?? '#a88040' }}>
                 {activeQuest.statEnglishName}
               </span>
             </div>
-            <span className="text-xs" style={{ color: '#4a6080' }}>ストップウォッチ</span>
+            <span className="text-xs" style={{ color: '#6a6050' }}>ストップウォッチ</span>
           </div>
         </DQWindow>
       </div>
@@ -116,19 +112,19 @@ export default function TimerScreen() {
           <div className="absolute rounded-full" style={{
             width: 240, height: 240,
             background: `radial-gradient(circle, ${diffColor}06 0%, transparent 70%)`,
-            boxShadow: `0 0 50px ${diffColor}12`,
+            boxShadow: `0 0 40px ${diffColor}08`,
           }} />
 
           {/* Outer ring */}
           <div className="absolute rounded-full" style={{
             width: 250, height: 250,
-            border: '2px solid rgba(184,204,224,0.15)',
+            border: '2px solid rgba(107,93,63,0.2)',
           }} />
 
-          {/* Arc SVG — rotates 1× per hour */}
+          {/* Arc SVG */}
           <svg width={260} height={260} className="absolute" style={{ transform: 'rotate(-90deg)' }}>
             <circle cx={130} cy={130} r={R}
-              fill="none" stroke="rgba(30,48,80,0.6)" strokeWidth={8} />
+              fill="none" stroke="rgba(58,52,40,0.5)" strokeWidth={8} />
             <circle cx={130} cy={130} r={R}
               fill="none"
               stroke={diffColor}
@@ -137,7 +133,7 @@ export default function TimerScreen() {
               strokeDasharray={circ}
               strokeDashoffset={offset}
               style={{ transition: 'stroke-dashoffset 0.5s linear' }}
-              filter={`drop-shadow(0 0 5px ${diffColor})`}
+              filter={`drop-shadow(0 0 4px ${diffColor})`}
             />
           </svg>
 
@@ -147,7 +143,7 @@ export default function TimerScreen() {
               className="font-cinzel font-bold tabular-nums"
               style={{
                 fontSize: elapsed >= 3600 ? 36 : 48,
-                color: '#e8f0f8',
+                color: '#d4cfc0',
                 letterSpacing: '0.04em',
               }}
             >
@@ -161,7 +157,7 @@ export default function TimerScreen() {
 
         {/* Quote */}
         <div className="mt-3 px-8 text-center">
-          <p className="text-xs italic" style={{ color: '#1e3050' }}>
+          <p className="text-xs italic" style={{ color: '#3a3428' }}>
             &ldquo;{quote}&rdquo;
           </p>
         </div>
@@ -169,26 +165,26 @@ export default function TimerScreen() {
 
       {/* ── Action section ── */}
       <div className="relative z-10 w-full px-5 pb-safe pb-10 space-y-3">
-        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(184,204,224,0.15), transparent)' }} />
+        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(107,93,63,0.2), transparent)' }} />
 
         {/* Stop confirm */}
         {showStop ? (
           <DQWindow>
-            <p className="text-sm text-center mb-3" style={{ color: '#b8cce0', fontFamily: 'serif' }}>
+            <p className="text-sm text-center mb-3" style={{ color: '#b8a88a', fontFamily: 'serif' }}>
               {timeDisplay} の冒険を記録しますか？
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowStop(false)}
                 className="flex-1 py-3 rounded font-cinzel text-sm"
-                style={{ background: 'rgba(1,8,16,0.5)', border: '1px solid rgba(184,204,224,0.2)', color: '#7090b0' }}
+                style={{ background: 'rgba(26,22,16,0.6)', border: '1px solid rgba(107,93,63,0.3)', color: '#8a7e6b' }}
               >
                 続ける
               </button>
               <button
                 onClick={handleStopClick}
                 className="flex-1 py-3 rounded font-cinzel text-sm font-bold"
-                style={{ background: `rgba(64,128,224,0.2)`, border: `1px solid #4080e080`, color: '#4080e0' }}
+                style={{ background: `rgba(196,163,90,0.15)`, border: `1px solid rgba(196,163,90,0.5)`, color: '#c4a35a' }}
               >
                 記録へ →
               </button>
@@ -199,10 +195,10 @@ export default function TimerScreen() {
             onClick={handleStopClick}
             className="w-full py-4 rounded font-cinzel text-sm font-bold tracking-widest transition-all active:scale-97"
             style={{
-              background: `${diffColor}18`,
-              border: `2px solid ${diffColor}70`,
+              background: `${diffColor}15`,
+              border: `2px solid ${diffColor}60`,
               color: diffColor,
-              boxShadow: `0 0 18px ${diffColor}30`,
+              boxShadow: `0 0 14px ${diffColor}20`,
             }}
           >
             冒険を切り上げる
@@ -214,21 +210,21 @@ export default function TimerScreen() {
           showAbandon ? (
             <DQWindow>
               <div className="flex items-center gap-2 mb-3">
-                <AlertCircle size={15} style={{ color: '#ef4444' }} />
-                <p className="text-sm" style={{ color: '#ef4444' }}>クエストを諦めますか？XPは得られません。</p>
+                <AlertCircle size={15} style={{ color: '#c45050' }} />
+                <p className="text-sm" style={{ color: '#c45050' }}>クエストを諦めますか？XPは得られません。</p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowAbandon(false)}
                   className="flex-1 py-3 rounded font-cinzel text-sm"
-                  style={{ background: 'rgba(1,8,16,0.5)', border: '1px solid rgba(184,204,224,0.2)', color: '#7090b0' }}
+                  style={{ background: 'rgba(26,22,16,0.6)', border: '1px solid rgba(107,93,63,0.3)', color: '#8a7e6b' }}
                 >
                   戻る
                 </button>
                 <button
                   onClick={handleAbandonClick}
                   className="flex-1 py-3 rounded font-cinzel text-sm font-bold"
-                  style={{ background: 'rgba(180,40,40,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}
+                  style={{ background: 'rgba(139,32,32,0.2)', border: '1px solid rgba(139,32,32,0.4)', color: '#c45050' }}
                 >
                   諦める
                 </button>
@@ -238,7 +234,7 @@ export default function TimerScreen() {
             <button
               onClick={handleAbandonClick}
               className="w-full py-2 rounded font-cinzel text-xs tracking-widest transition-all"
-              style={{ background: 'transparent', border: '1px solid rgba(30,48,80,0.5)', color: '#1e3050' }}
+              style={{ background: 'transparent', border: '1px solid rgba(107,93,63,0.2)', color: '#3a3428' }}
             >
               クエストを諦める
             </button>

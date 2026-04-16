@@ -13,6 +13,7 @@ export const INITIAL_GAME_DATA: GameData = {
   questHistory: [],
   logEntries: [],
   soundEnabled: true,
+  dailyCompletions: {},
 };
 
 export function loadGameData(): GameData {
@@ -49,6 +50,7 @@ export function loadGameData(): GameData {
         xpGained: q.xpGained ?? 0,
         completedAt: q.completedAt ?? new Date().toISOString(),
       })),
+      dailyCompletions: (parsed.dailyCompletions as Record<string, string>) ?? {},
       level: getLevelFromXP(parsed.totalXP ?? 0),
     };
   } catch {

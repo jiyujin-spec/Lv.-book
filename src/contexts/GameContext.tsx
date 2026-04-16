@@ -16,7 +16,7 @@ import {
   loadGameData, saveGameData, clearGameData, INITIAL_GAME_DATA,
 } from '@/lib/storage';
 import {
-  calculateXP, getLevelFromXP, generateId, TASK_XP,
+  calculateXP, getLevelFromXP, generateId, TASK_XP, getGameDay,
 } from '@/lib/gameLogic';
 import soundEngine from '@/lib/soundEngine';
 
@@ -56,10 +56,25 @@ type Action =
   | { type: 'TOGGLE_SOUND' }
   | { type: 'CLEAR_DATA' };
 
+/**
+ * Purge dailyCompletions entries that are older than the current game day.
+ */
+function resetStaleCompletions(completions: Record<string, string>): Record<string, string> {
+  const today = getGameDay();
+  const cleaned: Record<string, string> = {};
+  for (const [id, day] of Object.entries(completions)) {
+    if (day === today) cleaned[id] = day;
+  }
+  return cleaned;
+}
+
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'LOAD': {
-      const data = action.payload;
+      const data = {
+        ...action.payload,
+        dailyCompletions: resetStaleCompletions(action.payload.dailyCompletions ?? {}),
+      };
       return { ...state, data, screen: data.isFirstLaunch ? 'prologue' : 'main', isLoaded: true };
     }
     case 'SET_SCREEN':
@@ -116,7 +131,7 @@ function reducer(state: GameState, action: Action): GameState {
         newLogs.unshift({
           id: generateId(),
           type: 'level_up',
-          message: `Lv.${newLevel} になった！✨`,
+          message: `Lv.${newLevel} になった！`,
           timestamp: new Date().toISOString(),
         });
       }
@@ -174,7 +189,7 @@ function reducer(state: GameState, action: Action): GameState {
         newLogs.unshift({
           id: generateId(),
           type: 'level_up',
-          message: `Lv.${newLevel} になった！✨`,
+          message: `Lv.${newLevel} になった！`,
           timestamp: new Date().toISOString(),
         });
       }
@@ -192,6 +207,10 @@ function reducer(state: GameState, action: Action): GameState {
         completedAt: new Date().toISOString(),
       };
 
+      // Mark this task as completed for today
+      const today = getGameDay();
+      const newCompletions = { ...state.data.dailyCompletions, [preset.id]: today };
+
       const newData: GameData = {
         ...state.data,
         totalXP: newTotalXP,
@@ -199,9 +218,10 @@ function reducer(state: GameState, action: Action): GameState {
         stats: updatedStats,
         questHistory: [record, ...state.data.questHistory],
         logEntries: newLogs,
+        dailyCompletions: newCompletions,
       };
 
-      // Stay on current screen (tavern); level-up overlay handled locally in TavernScreen
+      // Stay on current screen (tavern)
       return { ...state, data: newData };
     }
 
@@ -261,6 +281,7 @@ interface GameContextValue {
   stopTimer: () => void;
   completeQuest: (focusRate: number) => void;
   completeTaskQuest: (preset: PresetQuest) => TaskQuestResult | null;
+  isTaskCompletedToday: (presetId: string) => boolean;
   dismissLevelUp: () => void;
   updateUserName: (name: string) => void;
   updateStats: (stats: StatItem[]) => void;
@@ -309,7 +330,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       xpGained = TASK_XP[activeQuest.difficulty as Difficulty];
       durationMinutes = 0;
     } else {
-      // time quest: use stoppedAt for accurate elapsed time
       const endTime = activeQuest.stoppedAt ?? Date.now();
       durationMinutes = (endTime - activeQuest.startedAt) / 60000;
       xpGained = calculateXP(activeQuest.difficulty as Difficulty, durationMinutes, focusRate);
@@ -338,6 +358,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const stat = state.data.stats.find(s => s.id === preset.statId);
     if (!stat) return null;
 
+    // Check if already completed today
+    const today = getGameDay();
+    if (state.data.dailyCompletions[preset.id] === today) return null;
+
     const xpGained = TASK_XP[preset.difficulty];
     const newTotalXP = state.data.totalXP + xpGained;
     const newLevel = getLevelFromXP(newTotalXP);
@@ -348,13 +372,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
       payload: { preset, statEnglishName: stat.englishName, xpGained },
     });
 
-    // Sound: stamp + quest complete fanfare
     soundEngine.playStamp();
     setTimeout(() => soundEngine.playQuestComplete(), 250);
     if (leveledUp) setTimeout(() => soundEngine.playLevelUp(), 3200);
 
     return { xpGained, leveledUp, newLevel };
   }, [state]);
+
+  const isTaskCompletedToday = useCallback((presetId: string): boolean => {
+    const today = getGameDay();
+    return state.data.dailyCompletions[presetId] === today;
+  }, [state.data.dailyCompletions]);
 
   const dismissLevelUp = useCallback(() => dispatch({ type: 'DISMISS_LEVEL_UP' }), []);
   const updateUserName  = useCallback((n: string) => dispatch({ type: 'UPDATE_USER_NAME', payload: n }), []);
@@ -371,7 +399,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   return (
     <GameContext.Provider value={{
       state, navigate, completePrologue, startQuest, stopTimer,
-      completeQuest, completeTaskQuest,
+      completeQuest, completeTaskQuest, isTaskCompletedToday,
       dismissLevelUp, updateUserName, updateStats,
       addPresetQuest, deletePresetQuest, toggleSound, clearData,
     }}>

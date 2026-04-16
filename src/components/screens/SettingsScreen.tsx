@@ -51,23 +51,23 @@ export default function SettingsScreen() {
   }
 
   const backBtn = panel !== 'main' && (
-    <button onClick={() => go('main')} className="p-2 rounded transition-all active:scale-90" style={{ color: '#f0c030' }}>
+    <button onClick={() => go('main')} className="p-2 rounded transition-all active:scale-90" style={{ color: '#c4a35a' }}>
       ←
     </button>
   );
 
   return (
-    <div className="fixed inset-0 flex flex-col" style={{ background: '#04091a' }}>
+    <div className="fixed inset-0 flex flex-col" style={{ background: '#0d0b08' }}>
       {/* Header */}
       <div className="relative z-10 flex items-center gap-3 px-4 pt-safe pt-5 pb-4"
-        style={{ borderBottom: '1px solid rgba(184,204,224,0.12)' }}>
-        {backBtn ?? <Settings size={19} style={{ color: '#f0c030' }} />}
+        style={{ borderBottom: '1px solid rgba(107,93,63,0.2)' }}>
+        {backBtn ?? <Settings size={19} style={{ color: '#c4a35a' }} />}
         <div>
-          <h1 className="font-cinzel text-base font-bold tracking-widest" style={{ color: '#f0c030' }}>
+          <h1 className="font-cinzel text-base font-bold tracking-widest" style={{ color: '#c4a35a' }}>
             {panel === 'main' ? '内省の儀' : panel === 'editName' ? '勇者名の変更' : panel === 'editStats' ? '石版を刻み直す' : panel === 'howToUse' ? '使い方' : 'データ削除'}
           </h1>
           {panel === 'main' && (
-            <p className="font-cinzel text-xs" style={{ color: '#4a6080', letterSpacing: '0.15em' }}>ORACLE & SETTINGS</p>
+            <p className="font-cinzel text-xs" style={{ color: '#6a6050', letterSpacing: '0.15em' }}>ORACLE & SETTINGS</p>
           )}
         </div>
       </div>
@@ -86,14 +86,14 @@ export default function SettingsScreen() {
                   key={i}
                   onClick={item.action}
                   className="w-full flex items-center gap-3 py-3.5 transition-all active:opacity-70"
-                  style={{ borderBottom: i < 1 ? '1px solid rgba(30,48,80,0.6)' : 'none' }}
+                  style={{ borderBottom: i < 1 ? '1px solid rgba(107,93,63,0.2)' : 'none' }}
                 >
-                  <span style={{ color: '#f0c030' }}>{item.icon}</span>
+                  <span style={{ color: '#c4a35a' }}>{item.icon}</span>
                   <div className="flex-1 text-left">
-                    <p className="text-sm" style={{ color: '#b8cce0' }}>{item.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: '#2a3a50' }}>{item.sub}</p>
+                    <p className="text-sm" style={{ color: '#b8a88a' }}>{item.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#4a4238' }}>{item.sub}</p>
                   </div>
-                  <ChevronRight size={15} style={{ color: '#1e3050' }} />
+                  <ChevronRight size={15} style={{ color: '#3a3428' }} />
                 </button>
               ))}
             </DQWindow>
@@ -102,17 +102,17 @@ export default function SettingsScreen() {
             <DQWindow>
               <button onClick={toggleSound} className="w-full flex items-center gap-3 py-1">
                 {data.soundEnabled
-                  ? <Volume2 size={15} style={{ color: '#f0c030' }} />
-                  : <VolumeX  size={15} style={{ color: '#1e3050' }} />}
+                  ? <Volume2 size={15} style={{ color: '#c4a35a' }} />
+                  : <VolumeX  size={15} style={{ color: '#3a3428' }} />}
                 <div className="flex-1 text-left">
-                  <p className="text-sm" style={{ color: '#b8cce0' }}>サウンド</p>
-                  <p className="text-xs" style={{ color: '#2a3a50' }}>効果音のON/OFF</p>
+                  <p className="text-sm" style={{ color: '#b8a88a' }}>サウンド</p>
+                  <p className="text-xs" style={{ color: '#4a4238' }}>効果音のON/OFF</p>
                 </div>
                 <div
                   className="w-11 h-6 rounded-full relative transition-all"
                   style={{
-                    background: data.soundEnabled ? '#f0c030' : 'rgba(30,48,80,0.5)',
-                    boxShadow: data.soundEnabled ? '0 0 8px rgba(240,192,48,0.4)' : 'none',
+                    background: data.soundEnabled ? '#c4a35a' : 'rgba(58,52,40,0.5)',
+                    boxShadow: data.soundEnabled ? '0 0 6px rgba(196,163,90,0.3)' : 'none',
                   }}
                 >
                   <div
@@ -126,31 +126,31 @@ export default function SettingsScreen() {
             {/* How to use / Delete */}
             <DQWindow>
               {[
-                { icon: <HelpCircle size={15}/>, label: '使い方', action: () => go('howToUse'), color: '#f0c030' },
-                { icon: <Trash2     size={15}/>, label: 'すべてのデータを削除', action: () => go('confirmDelete'), color: '#ef4444' },
+                { icon: <HelpCircle size={15}/>, label: '使い方', action: () => go('howToUse'), color: '#c4a35a' },
+                { icon: <Trash2     size={15}/>, label: 'すべてのデータを削除', action: () => go('confirmDelete'), color: '#c45050' },
               ].map((item, i) => (
                 <button
                   key={i}
                   onClick={item.action}
                   className="w-full flex items-center gap-3 py-3.5 transition-all active:opacity-70"
-                  style={{ borderBottom: i < 1 ? '1px solid rgba(30,48,80,0.6)' : 'none' }}
+                  style={{ borderBottom: i < 1 ? '1px solid rgba(107,93,63,0.2)' : 'none' }}
                 >
                   <span style={{ color: item.color }}>{item.icon}</span>
-                  <p className="text-sm flex-1 text-left" style={{ color: i === 1 ? '#ef4444' : '#b8cce0' }}>
+                  <p className="text-sm flex-1 text-left" style={{ color: i === 1 ? '#c45050' : '#b8a88a' }}>
                     {item.label}
                   </p>
-                  <ChevronRight size={15} style={{ color: '#1e3050' }} />
+                  <ChevronRight size={15} style={{ color: '#3a3428' }} />
                 </button>
               ))}
             </DQWindow>
 
             {/* Log */}
             <div>
-              <p className="font-cinzel text-xs px-1 mb-3" style={{ color: '#4a6080', letterSpacing: '0.2em' }}>
+              <p className="font-cinzel text-xs px-1 mb-3" style={{ color: '#6a6050', letterSpacing: '0.2em' }}>
                 ✦ 内省の記録
               </p>
               {data.logEntries.length === 0
-                ? <DQWindow><p className="text-sm text-center" style={{ color: '#1e3050', fontFamily: 'serif' }}>記録はまだない</p></DQWindow>
+                ? <DQWindow><p className="text-sm text-center" style={{ color: '#3a3428', fontFamily: 'serif' }}>記録はまだない</p></DQWindow>
                 : (
                   <div className="space-y-2">
                     {data.logEntries.slice(0, 40).map(e => (
@@ -158,16 +158,16 @@ export default function SettingsScreen() {
                         key={e.id}
                         className="flex gap-2 px-3 py-2.5 rounded"
                         style={{
-                          background: e.type === 'level_up' ? 'rgba(240,192,48,0.06)' : 'rgba(7,18,31,0.6)',
-                          border: `1px solid ${e.type === 'level_up' ? 'rgba(240,192,48,0.25)' : 'rgba(30,48,80,0.5)'}`,
+                          background: e.type === 'level_up' ? 'rgba(196,163,90,0.06)' : 'rgba(26,22,16,0.6)',
+                          border: `1px solid ${e.type === 'level_up' ? 'rgba(196,163,90,0.2)' : 'rgba(107,93,63,0.15)'}`,
                         }}
                       >
-                        <span style={{ fontSize: 13 }}>{e.type === 'level_up' ? '⭐' : '📖'}</span>
+                        <span style={{ fontSize: 13 }}>{e.type === 'level_up' ? '✦' : '📖'}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs" style={{ color: e.type === 'level_up' ? '#f0c030' : '#7090b0' }}>
+                          <p className="text-xs" style={{ color: e.type === 'level_up' ? '#c4a35a' : '#8a7e6b' }}>
                             {e.message}
                           </p>
-                          <p className="text-xs mt-0.5" style={{ color: '#1e3050', fontSize: 10 }}>
+                          <p className="text-xs mt-0.5" style={{ color: '#3a3428', fontSize: 10 }}>
                             {formatDateTime(e.timestamp)}
                           </p>
                         </div>
@@ -213,13 +213,13 @@ export default function SettingsScreen() {
                   <DQWindow className="w-full">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-sm flex-shrink-0"
-                        style={{ background: stat.color, boxShadow: `0 0 5px ${stat.color}` }}
+                        style={{ background: stat.color, boxShadow: `0 0 4px ${stat.color}` }}
                       />
                       <div className="flex-1 text-left">
                         <p className="font-cinzel font-bold text-sm" style={{ color: stat.color }}>{stat.englishName}</p>
-                        <p className="text-xs" style={{ color: '#2a3a50' }}>{stat.japaneseDescription}</p>
+                        <p className="text-xs" style={{ color: '#4a4238' }}>{stat.japaneseDescription}</p>
                       </div>
-                      <span style={{ color: '#1e3050', fontSize: 13 }}>✎</span>
+                      <span style={{ color: '#3a3428', fontSize: 13 }}>✎</span>
                     </div>
                   </DQWindow>
                 </button>
@@ -239,19 +239,19 @@ export default function SettingsScreen() {
             {[
               { icon: '📖', title: '冒険の書',      desc: 'レベル・XP・能力チャートを確認できます。' },
               { icon: '🏰', title: '冒険者の酒場',  desc: '保存済みクエストの一覧。タップして詳細確認→開始。' },
-              { icon: '✏️', title: 'クエスト制作',  desc: 'クエスト名・能力・難易度・時間を設定して保存。' },
-              { icon: '⏱️', title: 'タイマー',      desc: '没入モード。終了まで他の機能はロックされます。' },
+              { icon: '✏', title: 'クエスト制作',  desc: 'クエスト名・能力・難易度・形式を設定して保存。' },
+              { icon: '⏱', title: 'タイマー',      desc: '没入モード。終了まで他の機能はロックされます。' },
               { icon: '📊', title: 'リザルト',      desc: '集中度（0.5〜1.5×）を申告してXPを獲得。' },
               { icon: '📜', title: '詩人の書',      desc: '過去クエストの記録一覧。統計も確認できます。' },
-              { icon: '⚡', title: 'XP計算式',      desc: '(難易度係数 × 分÷60) × 集中度\nEasy×5 / Normal×10 / Hard×15' },
-              { icon: '⬆️', title: 'レベルアップ', desc: 'Lv1→2: 5XP\n以降: 10×(目標Lv-1)^2.2 の累計XP' },
+              { icon: '✦', title: 'XP計算式',      desc: '(難易度係数 × 分÷60) × 集中度\nEasy×5 / Normal×10 / Hard×15' },
+              { icon: '▲', title: 'レベルアップ', desc: 'Lv1→2: 5XP\n以降: 10×(目標Lv-1)^2.2 の累計XP' },
             ].map((item, i) => (
               <DQWindow key={i}>
                 <div className="flex items-start gap-2">
                   <span style={{ fontSize: 16 }}>{item.icon}</span>
                   <div>
-                    <p className="font-cinzel font-bold text-sm" style={{ color: '#f0c030' }}>{item.title}</p>
-                    <p className="text-xs mt-0.5 whitespace-pre-line" style={{ color: '#4a6080' }}>{item.desc}</p>
+                    <p className="font-cinzel font-bold text-sm" style={{ color: '#c4a35a' }}>{item.title}</p>
+                    <p className="text-xs mt-0.5 whitespace-pre-line" style={{ color: '#6a6050' }}>{item.desc}</p>
                   </div>
                 </div>
               </DQWindow>
@@ -263,12 +263,12 @@ export default function SettingsScreen() {
         {panel === 'confirmDelete' && (
           <div className="text-center py-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-              style={{ background: 'rgba(180,40,40,0.15)', border: '2px solid rgba(239,68,68,0.3)' }}>
-              <AlertTriangle size={30} style={{ color: '#ef4444' }} />
+              style={{ background: 'rgba(139,32,32,0.12)', border: '2px solid rgba(139,32,32,0.25)' }}>
+              <AlertTriangle size={30} style={{ color: '#c45050' }} />
             </div>
             <DQWindow className="mb-4">
-              <p className="font-cinzel text-sm font-bold mb-2" style={{ color: '#ef4444' }}>本当に削除しますか？</p>
-              <p className="text-xs" style={{ color: '#4a6080' }}>すべての冒険の記録が消えます。この操作は取り消せません。</p>
+              <p className="font-cinzel text-sm font-bold mb-2" style={{ color: '#c45050' }}>本当に削除しますか？</p>
+              <p className="text-xs" style={{ color: '#6a6050' }}>すべての冒険の記録が消えます。この操作は取り消せません。</p>
             </DQWindow>
             <div className="space-y-3">
               <DQButton onClick={() => { clearData(); setPanel('main'); }} variant="danger">
@@ -290,10 +290,10 @@ export default function SettingsScreen() {
           <div className="absolute inset-0 bg-black/65" />
           <div
             className="relative z-10 w-full px-4 pb-safe pb-6 pt-4 animate-slide-up"
-            style={{ background: '#07121f', borderTop: '2px solid rgba(184,204,224,0.3)' }}
+            style={{ background: '#1a1610', borderTop: '2px solid rgba(107,93,63,0.4)' }}
             onClick={e => e.stopPropagation()}
           >
-            <p className="font-cinzel text-xs text-center mb-4" style={{ color: '#f0c030', letterSpacing: '0.2em' }}>
+            <p className="font-cinzel text-xs text-center mb-4" style={{ color: '#c4a35a', letterSpacing: '0.2em' }}>
               ◆ ステータス名を変更 ◆
             </p>
             <div className="space-y-3 mb-4">
@@ -302,16 +302,16 @@ export default function SettingsScreen() {
                 { label: '説明',   val: editDesc, set: setEditDesc },
               ].map(f => (
                 <div key={f.label}>
-                  <p className="text-xs mb-1" style={{ color: '#4a6080' }}>{f.label}</p>
+                  <p className="text-xs mb-1" style={{ color: '#6a6050' }}>{f.label}</p>
                   <input
                     value={f.val}
                     onChange={e => f.set(e.target.value)}
                     className="w-full p-2 rounded text-sm outline-none"
                     style={{
-                      background: '#010810',
-                      border: '1px solid rgba(184,204,224,0.25)',
-                      color: '#e8f0f8',
-                      caretColor: '#f0c030',
+                      background: '#0a0806',
+                      border: '1px solid rgba(107,93,63,0.3)',
+                      color: '#d4cfc0',
+                      caretColor: '#c4a35a',
                     }}
                     maxLength={20}
                   />

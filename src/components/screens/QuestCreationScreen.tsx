@@ -40,7 +40,7 @@ export default function QuestCreationScreen() {
 
   const row = (label: string, content: React.ReactNode) => (
     <div className="mb-4">
-      <p className="font-cinzel text-xs mb-2" style={{ color: '#4a6080', letterSpacing: '0.2em' }}>
+      <p className="font-cinzel text-xs mb-2" style={{ color: '#6a6050', letterSpacing: '0.2em' }}>
         {label}
       </p>
       {content}
@@ -50,29 +50,29 @@ export default function QuestCreationScreen() {
   const taskXP = TASK_XP[diff];
 
   return (
-    <div className="fixed inset-0 flex flex-col" style={{ background: '#04091a' }}>
+    <div className="fixed inset-0 flex flex-col" style={{ background: '#0d0b08' }}>
       {/* Header */}
       <div
         className="flex items-center gap-3 px-4 pt-safe pt-5 pb-4"
-        style={{ borderBottom: '1px solid rgba(184,204,224,0.12)' }}
+        style={{ borderBottom: '1px solid rgba(107,93,63,0.2)' }}
       >
         <button
           onClick={() => { soundEngine.playClick(); navigate('tavern'); }}
           className="p-2 rounded transition-all active:scale-90"
-          style={{ color: '#f0c030' }}
+          style={{ color: '#c4a35a' }}
         >
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="font-cinzel text-base font-bold tracking-widest" style={{ color: '#f0c030' }}>
+          <h1 className="font-cinzel text-base font-bold tracking-widest" style={{ color: '#c4a35a' }}>
             クエスト制作
           </h1>
-          <p className="font-cinzel text-xs" style={{ color: '#4a6080', letterSpacing: '0.15em' }}>
+          <p className="font-cinzel text-xs" style={{ color: '#6a6050', letterSpacing: '0.15em' }}>
             QUEST CREATION
           </p>
         </div>
         <div className="ml-auto">
-          <Save size={17} style={{ color: '#4a6080' }} />
+          <Save size={17} style={{ color: '#6a6050' }} />
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export default function QuestCreationScreen() {
               placeholder="例: 筋トレ、読書、メール返信..."
               maxLength={40}
               className="w-full bg-transparent text-base outline-none"
-              style={{ color: '#e8f0f8', caretColor: '#f0c030', fontFamily: 'serif' }}
+              style={{ color: '#d4cfc0', caretColor: '#c4a35a', fontFamily: 'serif' }}
               autoFocus
             />
           ))}
@@ -107,25 +107,25 @@ export default function QuestCreationScreen() {
                 onClick={() => { soundEngine.playSelect(); setQuestType('time'); }}
                 className="flex flex-col items-center gap-2 p-4 rounded transition-all active:scale-95"
                 style={{
-                  background: questType === 'time' ? 'rgba(64,128,224,0.15)' : 'rgba(1,8,16,0.5)',
-                  border: `2px solid ${questType === 'time' ? '#4080e0' : 'rgba(30,48,80,0.8)'}`,
-                  boxShadow: questType === 'time' ? '0 0 14px rgba(64,128,224,0.3)' : 'none',
+                  background: questType === 'time' ? 'rgba(107,140,170,0.12)' : 'rgba(10,8,6,0.5)',
+                  border: `2px solid ${questType === 'time' ? '#6b8caa' : 'rgba(107,93,63,0.3)'}`,
+                  boxShadow: questType === 'time' ? '0 0 12px rgba(107,140,170,0.2)' : 'none',
                 }}
               >
                 <Timer
                   size={26}
-                  style={{ color: questType === 'time' ? '#4080e0' : '#2a3a50' }}
+                  style={{ color: questType === 'time' ? '#6b8caa' : '#4a4238' }}
                 />
                 <div className="text-center">
-                  <p className="font-cinzel text-sm font-bold" style={{ color: questType === 'time' ? '#4080e0' : '#2a3a50' }}>
+                  <p className="font-cinzel text-sm font-bold" style={{ color: questType === 'time' ? '#6b8caa' : '#4a4238' }}>
                     時間形式
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: questType === 'time' ? '#7090b0' : '#1e3050', fontSize: 10 }}>
+                  <p className="text-xs mt-0.5" style={{ color: questType === 'time' ? '#8a7e6b' : '#3a3428', fontSize: 10 }}>
                     ストップウォッチ
                   </p>
                 </div>
                 {questType === 'time' && (
-                  <span className="text-xs font-cinzel" style={{ color: '#4080e0' }}>✓ 選択中</span>
+                  <span className="text-xs font-cinzel" style={{ color: '#6b8caa' }}>✓ 選択中</span>
                 )}
               </button>
 
@@ -134,35 +134,34 @@ export default function QuestCreationScreen() {
                 onClick={() => { soundEngine.playSelect(); setQuestType('task'); }}
                 className="flex flex-col items-center gap-2 p-4 rounded transition-all active:scale-95"
                 style={{
-                  background: questType === 'task' ? 'rgba(48,200,64,0.12)' : 'rgba(1,8,16,0.5)',
-                  border: `2px solid ${questType === 'task' ? '#30c840' : 'rgba(30,48,80,0.8)'}`,
-                  boxShadow: questType === 'task' ? '0 0 14px rgba(48,200,64,0.25)' : 'none',
+                  background: questType === 'task' ? 'rgba(90,138,74,0.10)' : 'rgba(10,8,6,0.5)',
+                  border: `2px solid ${questType === 'task' ? '#5a8a4a' : 'rgba(107,93,63,0.3)'}`,
+                  boxShadow: questType === 'task' ? '0 0 12px rgba(90,138,74,0.2)' : 'none',
                 }}
               >
                 <CheckSquare
                   size={26}
-                  style={{ color: questType === 'task' ? '#30c840' : '#2a3a50' }}
+                  style={{ color: questType === 'task' ? '#5a8a4a' : '#4a4238' }}
                 />
                 <div className="text-center">
-                  <p className="font-cinzel text-sm font-bold" style={{ color: questType === 'task' ? '#30c840' : '#2a3a50' }}>
+                  <p className="font-cinzel text-sm font-bold" style={{ color: questType === 'task' ? '#5a8a4a' : '#4a4238' }}>
                     タスク形式
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: questType === 'task' ? '#5a9060' : '#1e3050', fontSize: 10 }}>
+                  <p className="text-xs mt-0.5" style={{ color: questType === 'task' ? '#6a8060' : '#3a3428', fontSize: 10 }}>
                     チェックリスト
                   </p>
                 </div>
                 {questType === 'task' && (
-                  <span className="text-xs font-cinzel" style={{ color: '#30c840' }}>✓ 選択中</span>
+                  <span className="text-xs font-cinzel" style={{ color: '#5a8a4a' }}>✓ 選択中</span>
                 )}
               </button>
             </div>
           ))}
 
-          {/* Description */}
-          <p className="text-xs text-center mt-2" style={{ color: '#1e3050' }}>
+          <p className="text-xs text-center mt-2" style={{ color: '#3a3428' }}>
             {questType === 'time'
               ? '⏱ 開始からストップまでの時間でXPを計算'
-              : '✅ 完了タップで固定XPを即付与'}
+              : '✓ 完了タップで固定XPを即付与（1日1回）'}
           </p>
         </DQWindow>
 
@@ -176,19 +175,19 @@ export default function QuestCreationScreen() {
                   onClick={() => { soundEngine.playSelect(); setStatId(stat.id); }}
                   className="w-full flex items-center gap-3 px-3 py-3 rounded transition-all active:scale-98"
                   style={{
-                    background: statId === stat.id ? `${stat.color}18` : 'rgba(1,8,16,0.5)',
-                    border: `1.5px solid ${statId === stat.id ? stat.color : 'rgba(30,48,80,0.8)'}`,
-                    boxShadow: statId === stat.id ? `0 0 10px ${stat.color}30` : 'none',
+                    background: statId === stat.id ? `${stat.color}18` : 'rgba(10,8,6,0.5)',
+                    border: `1.5px solid ${statId === stat.id ? stat.color : 'rgba(107,93,63,0.3)'}`,
+                    boxShadow: statId === stat.id ? `0 0 8px ${stat.color}25` : 'none',
                   }}
                 >
                   <div
                     className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ background: stat.color, boxShadow: statId === stat.id ? `0 0 6px ${stat.color}` : 'none' }}
+                    style={{ background: stat.color, boxShadow: statId === stat.id ? `0 0 5px ${stat.color}` : 'none' }}
                   />
-                  <span className="font-cinzel text-sm font-bold" style={{ color: statId === stat.id ? stat.color : '#4a6080' }}>
+                  <span className="font-cinzel text-sm font-bold" style={{ color: statId === stat.id ? stat.color : '#6a6050' }}>
                     {stat.englishName}
                   </span>
-                  <span className="text-xs ml-1" style={{ color: '#2a3a50' }}>
+                  <span className="text-xs ml-1" style={{ color: '#4a4238' }}>
                     {stat.japaneseDescription}
                   </span>
                   {statId === stat.id && (
@@ -210,10 +209,10 @@ export default function QuestCreationScreen() {
                   onClick={() => { soundEngine.playSelect(); setDiff(d); }}
                   className="py-3 rounded font-cinzel font-bold text-sm transition-all active:scale-95"
                   style={{
-                    background: diff === d ? `${DIFFICULTY_COLORS[d]}20` : 'rgba(1,8,16,0.5)',
-                    border: `1.5px solid ${diff === d ? DIFFICULTY_COLORS[d] : 'rgba(30,48,80,0.8)'}`,
-                    color: diff === d ? DIFFICULTY_COLORS[d] : '#2a3a50',
-                    boxShadow: diff === d ? `0 0 12px ${DIFFICULTY_COLORS[d]}40` : 'none',
+                    background: diff === d ? `${DIFFICULTY_COLORS[d]}20` : 'rgba(10,8,6,0.5)',
+                    border: `1.5px solid ${diff === d ? DIFFICULTY_COLORS[d] : 'rgba(107,93,63,0.3)'}`,
+                    color: diff === d ? DIFFICULTY_COLORS[d] : '#4a4238',
+                    boxShadow: diff === d ? `0 0 10px ${DIFFICULTY_COLORS[d]}30` : 'none',
                   }}
                 >
                   {d}
@@ -221,7 +220,7 @@ export default function QuestCreationScreen() {
               ))}
             </div>
           ))}
-          <p className="text-xs text-center mt-1" style={{ color: '#2a3a50' }}>
+          <p className="text-xs text-center mt-1" style={{ color: '#4a4238' }}>
             {diff === 'Easy' && (questType === 'time' ? '係数 ×5 — 気軽な挑戦' : `固定 ${taskXP} XP — 気軽な任務`)}
             {diff === 'Normal' && (questType === 'time' ? '係数 ×10 — 標準の試練' : `固定 ${taskXP} XP — 標準の任務`)}
             {diff === 'Hard' && (questType === 'time' ? '係数 ×15 — 困難な冒険' : `固定 ${taskXP} XP — 困難な任務`)}
@@ -231,28 +230,28 @@ export default function QuestCreationScreen() {
         {/* XP Preview */}
         <DQWindow>
           <div className="text-center">
-            <p className="font-cinzel text-xs mb-1" style={{ color: '#4a6080', letterSpacing: '0.25em' }}>
+            <p className="font-cinzel text-xs mb-1" style={{ color: '#6a6050', letterSpacing: '0.25em' }}>
               EXPECTED REWARD
             </p>
             {questType === 'task' ? (
               <>
                 <p>
-                  <span className="font-cinzel text-4xl font-bold" style={{ color: '#f0c030' }}>
+                  <span className="font-cinzel text-4xl font-bold" style={{ color: '#c4a35a' }}>
                     {taskXP}
                   </span>
-                  <span className="text-base ml-1 font-cinzel" style={{ color: '#b8cce0' }}>XP</span>
+                  <span className="text-base ml-1 font-cinzel" style={{ color: '#b8a88a' }}>XP</span>
                 </p>
-                <p className="text-xs mt-1" style={{ color: '#2a3a50' }}>難易度による固定値</p>
+                <p className="text-xs mt-1" style={{ color: '#4a4238' }}>難易度による固定値</p>
               </>
             ) : (
               <>
                 <p>
-                  <span className="font-cinzel text-2xl font-bold" style={{ color: '#f0c030' }}>
+                  <span className="font-cinzel text-2xl font-bold" style={{ color: '#c4a35a' }}>
                     {diff === 'Easy' ? '5' : diff === 'Normal' ? '10' : '15'}
                   </span>
-                  <span className="text-sm ml-1 font-cinzel" style={{ color: '#b8cce0' }}>× 時間(h) × 集中度</span>
+                  <span className="text-sm ml-1 font-cinzel" style={{ color: '#b8a88a' }}>× 時間(h) × 集中度</span>
                 </p>
-                <p className="text-xs mt-1" style={{ color: '#2a3a50' }}>例: 1時間・集中1.0× → {diff === 'Easy' ? '5' : diff === 'Normal' ? '10' : '15'} XP</p>
+                <p className="text-xs mt-1" style={{ color: '#4a4238' }}>例: 1時間・集中1.0× → {diff === 'Easy' ? '5' : diff === 'Normal' ? '10' : '15'} XP</p>
               </>
             )}
           </div>

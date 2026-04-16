@@ -9,41 +9,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ── DQ Dark Navy palette ──────────────────────────────────────
-        dq: {
-          bg:     '#04091a',   // page void
-          void:   '#020610',   // deepest dark
-          window: '#07121f',   // window interior
-          border: '#b8cce0',   // double-border color (light blue-white)
-          text:   '#e8f0f8',   // main text
-          muted:  '#4a6080',   // muted/disabled text
-          gold:   '#f0c030',   // gold highlight
-          yellow: '#ffd700',   // bright gold
-          blue:   '#4080e0',   // DQ magic blue
-          green:  '#30c840',   // DQ HP green
+        // ── Grimoire / Soulsborne palette ─────────────────────────────
+        grim: {
+          bg:       '#0d0b08',
+          surface:  '#1a1610',
+          raised:   '#221e16',
+          border:   '#6b5d3f',
+          borderDim:'#3a3428',
+          gold:     '#c4a35a',
+          goldDim:  '#8b7a50',
+          text:     '#d4cfc0',
+          muted:    '#6a6050',
+          dim:      '#3a3428',
+          crimson:  '#8b2020',
+          ink:      '#0a0806',
         },
-        // ── Parchment palette ─────────────────────────────────────────
-        parchment: {
-          DEFAULT: '#f4e4bc',
-          light:   '#f8eecf',
-          dark:    '#d4c49c',
-          ink:     '#2c1810',
-          sepia:   '#8b7355',
-          shadow:  '#5a3a2a',
-        },
-        // ── Stat colours ──────────────────────────────────────────────
         stat: {
-          vigor:    '#ef4444',
-          intellect:'#3b82f6',
-          social:   '#22c55e',
-          fortune:  '#f59e0b',
-          will:     '#a855f7',
+          vigor:    '#9a4535',
+          intellect:'#3a6a8a',
+          social:   '#4a7a4a',
+          fortune:  '#a88040',
+          will:     '#6a3a5a',
         },
-        // ── Difficulty colours ────────────────────────────────────────
         difficulty: {
-          easy:   '#22c55e',
-          normal: '#f59e0b',
-          hard:   '#ef4444',
+          easy:   '#5a8a4a',
+          normal: '#a88040',
+          hard:   '#9a4535',
         },
       },
       fontFamily: {
@@ -59,7 +50,6 @@ const config: Config = {
         'sparkle':     'sparkle 1.4s ease-in-out infinite',
         'slide-up':    'slideUp 0.3s ease-out forwards',
         'pop-in':      'popIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275) forwards',
-        'dq-cursor':   'dqCursor 1s step-end infinite',
       },
       keyframes: {
         float: {
@@ -67,8 +57,8 @@ const config: Config = {
           '50%':     { transform: 'translateY(-8px)' },
         },
         glowPulse: {
-          '0%,100%': { boxShadow: '0 0 6px #f0c030, 0 0 12px #f0c030' },
-          '50%':     { boxShadow: '0 0 14px #ffd700, 0 0 28px #ffd700, 0 0 42px #c89010' },
+          '0%,100%': { boxShadow: '0 0 4px #c4a35a, 0 0 8px #c4a35a' },
+          '50%':     { boxShadow: '0 0 10px #c4a35a, 0 0 20px #c4a35a' },
         },
         levelUp: {
           '0%':   { transform: 'scale(0.5)', opacity: '0' },
@@ -94,10 +84,6 @@ const config: Config = {
         popIn: {
           '0%':   { transform: 'scale(0.85)', opacity: '0' },
           '100%': { transform: 'scale(1)',    opacity: '1' },
-        },
-        dqCursor: {
-          '0%,100%': { opacity: '1' },
-          '50%':     { opacity: '0' },
         },
       },
     },

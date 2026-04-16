@@ -80,49 +80,43 @@ class SoundEngine {
     source.start(startTime);
   }
 
-  // ── Feather pen on parchment ──────────────────────────────────────────────
+  // ── Natural pen stroke on parchment — single short "シュッ" ───────────────
   playWriting() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    // High-frequency scratchy bursts — quill on parchment
-    this.noise(t,        0.04, 0.14, 3200);
-    this.noise(t + 0.05, 0.03, 0.10, 4500);
-    this.noise(t + 0.10, 0.04, 0.12, 2800);
-    this.noise(t + 0.15, 0.025, 0.09, 3800);
-    this.noise(t + 0.19, 0.03, 0.11, 3400);
+    // Low-mid frequency pen stroke — soft, not choppy
+    this.noise(t, 0.08, 0.10, 1400);
+    this.noise(t + 0.02, 0.06, 0.06, 1800);
   }
 
-  // ── Retro cursor/click ────────────────────────────────────────────────────
-  /** Single soft click for UI buttons */
+  // ── Soft click ────────────────────────────────────────────────────────────
   playClick() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    this.tone(880, t, 0.05, 'sine', 0.12, 0.003, 0.04);
+    this.tone(660, t, 0.05, 'sine', 0.10, 0.003, 0.04);
   }
 
-  // ── DQ-style popo selection ───────────────────────────────────────────────
-  /** Two-note retro selection blip for menu/card selection */
+  // ── Selection blip ────────────────────────────────────────────────────────
   playSelect() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    this.tone(880,  t,        0.045, 'square', 0.14, 0.002, 0.025);
-    this.tone(1174, t + 0.06, 0.045, 'square', 0.14, 0.002, 0.025);
+    this.tone(660,  t,        0.045, 'triangle', 0.12, 0.002, 0.025);
+    this.tone(880,  t + 0.06, 0.045, 'triangle', 0.12, 0.002, 0.025);
   }
 
-  // ── Menu open ────────────────────────────────────────────────────────────
+  // ── Menu open ─────────────────────────────────────────────────────────────
   playMenuOpen() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    this.tone(587, t,        0.07, 'square', 0.13, 0.003, 0.04);
-    this.tone(784, t + 0.08, 0.07, 'square', 0.13, 0.003, 0.04);
+    this.tone(440, t,        0.07, 'triangle', 0.11, 0.003, 0.04);
+    this.tone(587, t + 0.08, 0.07, 'triangle', 0.11, 0.003, 0.04);
   }
 
-  // ── Adventure start jingle (heavier) ─────────────────────────────────────
-  /** Full dramatic quest-start fanfare */
+  // ── Quest start — deep horn + drum hit ────────────────────────────────────
   playQuestStart() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
@@ -130,14 +124,14 @@ class SoundEngine {
     // Drum hit
     this.noise(t, 0.12, 0.35, 120);
     this.tone(80, t, 0.12, 'sine', 0.35, 0.001, 0.08);
-    // Horn sequence: C4 E4 G4 C5
-    this.tone(261.63, t + 0.15, 0.15, 'square', 0.20, 0.01, 0.06);
-    this.tone(329.63, t + 0.31, 0.15, 'square', 0.20, 0.01, 0.06);
-    this.tone(392.00, t + 0.47, 0.15, 'square', 0.22, 0.01, 0.06);
-    this.tone(523.25, t + 0.63, 0.30, 'square', 0.25, 0.01, 0.12);
+    // Horn sequence: C4 E4 G4 C5 (triangle for warmer tone)
+    this.tone(261.63, t + 0.15, 0.15, 'triangle', 0.18, 0.01, 0.06);
+    this.tone(329.63, t + 0.31, 0.15, 'triangle', 0.18, 0.01, 0.06);
+    this.tone(392.00, t + 0.47, 0.15, 'triangle', 0.20, 0.01, 0.06);
+    this.tone(523.25, t + 0.63, 0.30, 'triangle', 0.22, 0.01, 0.12);
     // Harmony
-    this.tone(196.00, t + 0.47, 0.46, 'triangle', 0.10, 0.02, 0.15);
-    this.tone(261.63, t + 0.47, 0.46, 'triangle', 0.08, 0.02, 0.15);
+    this.tone(196.00, t + 0.47, 0.46, 'sine', 0.08, 0.02, 0.15);
+    this.tone(261.63, t + 0.47, 0.46, 'sine', 0.06, 0.02, 0.15);
   }
 
   // ── Quest complete chime ──────────────────────────────────────────────────
@@ -147,8 +141,8 @@ class SoundEngine {
     const t = ctx.currentTime;
     const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((freq, i) => {
-      this.tone(freq, t + i * 0.14, 0.7, 'sine', 0.27, 0.005, 0.5);
-      this.tone(freq * 2, t + i * 0.14, 0.4, 'sine', 0.06, 0.005, 0.3);
+      this.tone(freq, t + i * 0.14, 0.7, 'sine', 0.24, 0.005, 0.5);
+      this.tone(freq * 2, t + i * 0.14, 0.4, 'sine', 0.05, 0.005, 0.3);
     });
   }
 
@@ -158,32 +152,35 @@ class SoundEngine {
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
     const seq = [
-      [261.63, 0.00, 0.11, 'triangle', 0.28],
-      [329.63, 0.11, 0.11, 'triangle', 0.28],
-      [392.00, 0.22, 0.11, 'triangle', 0.28],
-      [523.25, 0.33, 0.18, 'triangle', 0.32],
-      [392.00, 0.51, 0.09, 'triangle', 0.24],
-      [523.25, 0.60, 0.09, 'triangle', 0.24],
-      [659.25, 0.69, 0.09, 'triangle', 0.27],
-      [783.99, 0.78, 0.36, 'triangle', 0.30],
-      [1046.50,0.90, 0.60, 'sine',     0.33],
+      [261.63, 0.00, 0.11, 'triangle', 0.25],
+      [329.63, 0.11, 0.11, 'triangle', 0.25],
+      [392.00, 0.22, 0.11, 'triangle', 0.25],
+      [523.25, 0.33, 0.18, 'triangle', 0.28],
+      [392.00, 0.51, 0.09, 'triangle', 0.22],
+      [523.25, 0.60, 0.09, 'triangle', 0.22],
+      [659.25, 0.69, 0.09, 'triangle', 0.25],
+      [783.99, 0.78, 0.36, 'triangle', 0.27],
+      [1046.50,0.90, 0.60, 'sine',     0.30],
     ] as const;
     seq.forEach(([freq, offset, dur, type, vol]) =>
       this.tone(freq, t + offset, dur, type as OscType, vol, 0.01, 0.08)
     );
     [261.63, 329.63, 392.00].forEach(f =>
-      this.tone(f, t + 0.33, 0.80, 'sine', 0.09, 0.02, 0.4)
+      this.tone(f, t + 0.33, 0.80, 'sine', 0.08, 0.02, 0.4)
     );
   }
 
-  // ── Stamp thud ───────────────────────────────────────────────────────────
+  // ── Heavy stamp thud — "DON" ─────────────────────────────────────────────
   playStamp() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    this.noise(t, 0.08, 0.35, 200);
-    this.tone(80, t, 0.15, 'sine', 0.4, 0.001, 0.12);
-    this.tone(120, t, 0.12, 'sine', 0.25, 0.001, 0.10);
+    // Deep impact
+    this.noise(t, 0.10, 0.40, 180);
+    this.tone(65,  t, 0.18, 'sine', 0.45, 0.001, 0.14);
+    this.tone(100, t, 0.14, 'sine', 0.30, 0.001, 0.10);
+    // Secondary thud rumble
+    this.noise(t + 0.05, 0.08, 0.20, 100);
   }
 }
 

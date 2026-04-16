@@ -45,10 +45,10 @@ export default function PrologueScreen() {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden" style={{ background: '#04091a' }}>
-      {/* Ambient orbs */}
-      <div className="bg-orb" style={{ width: 350, height: 350, background: '#102060', top: -80, left: -80 }} />
-      <div className="bg-orb" style={{ width: 250, height: 250, background: '#301080', bottom: -60, right: -60, animationDelay: '5s' }} />
+    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden" style={{ background: '#0d0b08' }}>
+      {/* Ambient orbs — warm tones */}
+      <div className="bg-orb" style={{ width: 350, height: 350, background: '#3a2810', top: -80, left: -80 }} />
+      <div className="bg-orb" style={{ width: 250, height: 250, background: '#2a1808', bottom: -60, right: -60, animationDelay: '5s' }} />
       <ParticleEffect count={22} />
 
       <div
@@ -58,21 +58,21 @@ export default function PrologueScreen() {
         {/* ── INTRO ── */}
         {step === 'intro' && (
           <div className="text-center animate-fade-in-up">
-            <div className="text-7xl mb-5 animate-float inline-block" style={{ filter: 'drop-shadow(0 0 20px #4080e0)' }}>
+            <div className="text-7xl mb-5 animate-float inline-block" style={{ filter: 'drop-shadow(0 0 15px rgba(196,163,90,0.4))' }}>
               📖
             </div>
-            <h1 className="font-cinzel text-3xl font-bold mb-1 tracking-widest" style={{ color: '#f0c030' }}>
+            <h1 className="font-cinzel text-3xl font-bold mb-1 tracking-widest" style={{ color: '#c4a35a' }}>
               Lv. BOOK
             </h1>
-            <p className="font-cinzel text-xs tracking-[0.3em] mb-6" style={{ color: '#4a6080' }}>
+            <p className="font-cinzel text-xs tracking-[0.3em] mb-6" style={{ color: '#6a6050' }}>
               THE MAGIC GRIMOIRE
             </p>
             <DQWindow className="mb-6 text-left">
-              <p className="text-sm leading-relaxed mb-2" style={{ color: '#b8cce0' }}>勇者よ、ようこそ。</p>
-              <p className="text-sm leading-relaxed mb-2" style={{ color: '#7090b0' }}>
+              <p className="text-sm leading-relaxed mb-2" style={{ color: '#d4cfc0' }}>勇者よ、ようこそ。</p>
+              <p className="text-sm leading-relaxed mb-2" style={{ color: '#8a7e6b' }}>
                 この魔法の書は、あなたの日々の努力を刻み、冒険の軌跡を永遠に綴り続ける。
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: '#7090b0' }}>
+              <p className="text-sm leading-relaxed" style={{ color: '#8a7e6b' }}>
                 一歩ずつの歩みが、やがて伝説へと変わる。
               </p>
             </DQWindow>
@@ -84,8 +84,8 @@ export default function PrologueScreen() {
         {step === 'name' && (
           <div className="animate-fade-in-up">
             <div className="text-center mb-5">
-              <p className="font-cinzel text-xl font-bold" style={{ color: '#f0c030' }}>勇者の名</p>
-              <p className="font-cinzel text-xs mt-1" style={{ color: '#4a6080', letterSpacing: '0.2em' }}>HERO&apos;S NAME</p>
+              <p className="font-cinzel text-xl font-bold" style={{ color: '#c4a35a' }}>勇者の名</p>
+              <p className="font-cinzel text-xs mt-1" style={{ color: '#6a6050', letterSpacing: '0.2em' }}>HERO&apos;S NAME</p>
             </div>
             <DQWindow parchment className="mb-4">
               <p className="text-xs text-center mb-3" style={{ color: '#8b7355', fontFamily: 'serif' }}>― あなたの名を刻め ―</p>
@@ -100,7 +100,7 @@ export default function PrologueScreen() {
                 autoFocus
               />
             </DQWindow>
-            <p className="text-xs text-center mb-4" style={{ color: '#1e3050' }}>※後から変更できます</p>
+            <p className="text-xs text-center mb-4" style={{ color: '#3a3428' }}>※後から変更できます</p>
             <DQButton onClick={advance} disabled={!userName.trim()} variant="gold">次へ進む</DQButton>
           </div>
         )}
@@ -109,9 +109,9 @@ export default function PrologueScreen() {
         {step === 'stats' && (
           <div className="animate-fade-in-up">
             <div className="text-center mb-4">
-              <p className="font-cinzel text-xl font-bold" style={{ color: '#f0c030' }}>勇者の石版</p>
-              <p className="font-cinzel text-xs mt-1" style={{ color: '#4a6080', letterSpacing: '0.2em' }}>HERO&apos;S STONE TABLET</p>
-              <p className="text-xs mt-2" style={{ color: '#1e3050' }}>タップして名前を変更できます</p>
+              <p className="font-cinzel text-xl font-bold" style={{ color: '#c4a35a' }}>勇者の石版</p>
+              <p className="font-cinzel text-xs mt-1" style={{ color: '#6a6050', letterSpacing: '0.2em' }}>HERO&apos;S STONE TABLET</p>
+              <p className="text-xs mt-2" style={{ color: '#3a3428' }}>タップして名前を変更できます</p>
             </div>
             <DQWindow className="mb-4">
               <div className="space-y-2">
@@ -120,14 +120,14 @@ export default function PrologueScreen() {
                     key={stat.id}
                     onClick={() => openEdit(idx)}
                     className="w-full flex items-center gap-3 py-2.5 px-1 transition-all active:opacity-70"
-                    style={{ borderBottom: idx < stats.length - 1 ? '1px solid rgba(30,48,80,0.4)' : 'none' }}
+                    style={{ borderBottom: idx < stats.length - 1 ? '1px solid rgba(107,93,63,0.25)' : 'none' }}
                   >
                     <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
-                      style={{ background: stat.color, boxShadow: `0 0 5px ${stat.color}` }}
+                      style={{ background: stat.color, boxShadow: `0 0 4px ${stat.color}` }}
                     />
                     <span className="font-cinzel font-bold text-sm" style={{ color: stat.color }}>{stat.englishName}</span>
-                    <span className="text-xs" style={{ color: '#2a3a50' }}>{stat.japaneseDescription}</span>
-                    <span className="ml-auto text-xs" style={{ color: '#1e3050' }}>✎</span>
+                    <span className="text-xs" style={{ color: '#4a4238' }}>{stat.japaneseDescription}</span>
+                    <span className="ml-auto text-xs" style={{ color: '#3a3428' }}>✎</span>
                   </button>
                 ))}
               </div>
@@ -139,16 +139,16 @@ export default function PrologueScreen() {
         {/* ── CONFIRM ── */}
         {step === 'confirm' && (
           <div className="animate-fade-in-up text-center">
-            <div className="text-5xl mb-4 animate-float inline-block">✨</div>
-            <p className="font-cinzel text-xl font-bold mb-1" style={{ color: '#f0c030' }}>準備完了</p>
-            <p className="font-cinzel text-xs mb-5" style={{ color: '#4a6080', letterSpacing: '0.2em' }}>READY TO BEGIN</p>
+            <div className="text-5xl mb-4 animate-float inline-block">✦</div>
+            <p className="font-cinzel text-xl font-bold mb-1" style={{ color: '#c4a35a' }}>準備完了</p>
+            <p className="font-cinzel text-xs mb-5" style={{ color: '#6a6050', letterSpacing: '0.2em' }}>READY TO BEGIN</p>
             <DQWindow parchment className="mb-5">
               <p className="text-xs text-center mb-2" style={{ color: '#8b7355', fontFamily: 'serif' }}>勇者の名</p>
               <p className="text-2xl font-bold text-center mb-3" style={{ color: '#2c1810', fontFamily: 'serif' }}>{userName}</p>
               <DQDivider parchment />
               <p className="text-xs text-center" style={{ color: '#8b7355' }}>Lv.1 見習い冒険者 として出発</p>
             </DQWindow>
-            <DQButton onClick={advance} variant="gold">✨ 冒険の書を開く ✨</DQButton>
+            <DQButton onClick={advance} variant="gold">◆ 冒険の書を開く ◆</DQButton>
           </div>
         )}
       </div>
@@ -159,10 +159,10 @@ export default function PrologueScreen() {
           <div className="absolute inset-0 bg-black/65" />
           <div
             className="relative z-10 w-full px-4 pb-8 pt-4 animate-slide-up"
-            style={{ background: '#07121f', borderTop: '2px solid rgba(184,204,224,0.3)' }}
+            style={{ background: '#1a1610', borderTop: '2px solid rgba(107,93,63,0.4)' }}
             onClick={e => e.stopPropagation()}
           >
-            <p className="font-cinzel text-xs text-center mb-4" style={{ color: '#f0c030', letterSpacing: '0.2em' }}>
+            <p className="font-cinzel text-xs text-center mb-4" style={{ color: '#c4a35a', letterSpacing: '0.2em' }}>
               ◆ ステータス名を変更 ◆
             </p>
             <div className="space-y-3 mb-4">
@@ -171,12 +171,12 @@ export default function PrologueScreen() {
                 { label: '説明',   val: editDesc, set: setEditDesc },
               ].map(f => (
                 <div key={f.label}>
-                  <p className="text-xs mb-1" style={{ color: '#4a6080' }}>{f.label}</p>
+                  <p className="text-xs mb-1" style={{ color: '#6a6050' }}>{f.label}</p>
                   <input
                     value={f.val}
                     onChange={e => f.set(e.target.value)}
                     className="w-full p-2 rounded text-sm outline-none"
-                    style={{ background: '#010810', border: '1px solid rgba(184,204,224,0.25)', color: '#e8f0f8', caretColor: '#f0c030' }}
+                    style={{ background: '#0a0806', border: '1px solid rgba(107,93,63,0.3)', color: '#d4cfc0', caretColor: '#c4a35a' }}
                     maxLength={20}
                   />
                 </div>

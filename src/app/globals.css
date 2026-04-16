@@ -10,8 +10,8 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  background: #04091a;
-  color: #e8f0f8;
+  background: #0d0b08;
+  color: #d4cfc0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
@@ -28,86 +28,36 @@ html, body {
 /* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(184,204,224,0.2); border-radius: 2px; }
-
-/* ── DQ Window ───────────────────────────────────────────── */
-/*
-   Classic DQ window = outer border · 3-px gap · inner border
-   Achieved with a wrapper + inner div, both with same border color.
-*/
-.dq-window {
-  background: #07121f;
-  border: 2px solid #b8cce0;
-  border-radius: 3px;
-  padding: 3px;
-}
-.dq-window-inner {
-  border: 1px solid #b8cce0;
-  border-radius: 1px;
-  padding: 16px;
-  background: linear-gradient(160deg, #07121f 0%, #0a1a30 100%);
-}
-
-/* Parchment variant */
-.dq-window-parchment {
-  background: #f4e4bc;
-  border: 2px solid #b8cce0;
-  border-radius: 3px;
-  padding: 3px;
-}
-.dq-window-parchment-inner {
-  border: 1px solid #b8cce0;
-  border-radius: 1px;
-  padding: 16px;
-  background: linear-gradient(160deg, #f8eecf 0%, #f0e0b0 50%, #f4e4bc 100%);
-}
+::-webkit-scrollbar-thumb { background: rgba(107,93,63,0.3); border-radius: 2px; }
 
 /* ── Gold text gradient ──────────────────────────────────── */
 .text-gold {
-  background: linear-gradient(180deg, #ffd700 0%, #c89010 100%);
+  background: linear-gradient(180deg, #c4a35a 0%, #8b7a50 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── DQ cursor blink ─────────────────────────────────────── */
-.dq-cursor::after {
-  content: '▼';
-  display: inline-block;
-  animation: dqCursor 1s step-end infinite;
-  margin-left: 4px;
-  font-size: 0.7em;
-  color: #f0c030;
-}
-
-/* ── Parchment texture ───────────────────────────────────── */
-.parchment-bg {
-  background:
-    radial-gradient(ellipse at 20% 30%, rgba(200,160,80,0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(160,120,60,0.08) 0%, transparent 50%),
-    linear-gradient(160deg, #f8eecf 0%, #f0e0b0 50%, #f4e4bc 100%);
-}
-
-/* ── XP bar DQ style ─────────────────────────────────────── */
+/* ── XP bar ──────────────────────────────────────────────── */
 .xp-bar-track {
-  background: #010810;
-  border: 1px solid #b8cce0;
+  background: #0a0806;
+  border: 1px solid rgba(107,93,63,0.4);
   border-radius: 2px;
   height: 14px;
   overflow: hidden;
 }
 .xp-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #1850c0, #4080e0, #60a0ff);
-  box-shadow: 0 0 8px rgba(64,128,224,0.6);
+  background: linear-gradient(90deg, #8b7a50, #c4a35a, #d4b06a);
+  box-shadow: 0 0 6px rgba(196,163,90,0.4);
   border-radius: 1px;
   transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ── Stat bar (slim) ─────────────────────────────────────── */
 .stat-bar-track {
-  background: #010810;
-  border: 1px solid rgba(184,204,224,0.25);
+  background: #0a0806;
+  border: 1px solid rgba(107,93,63,0.2);
   border-radius: 1px;
   height: 6px;
   overflow: hidden;
@@ -124,10 +74,10 @@ input[type=number] { -moz-appearance: textfield; }
 /* ── Focus ───────────────────────────────────────────────── */
 input:focus, textarea:focus { outline: none; }
 
-/* ── Ambient orbs in background ──────────────────────────── */
+/* ── Ambient orbs (warm tones) ───────────────────────────── */
 @keyframes orbFloat {
-  0%,100% { transform: translateY(0) scale(1); opacity: 0.15; }
-  50%      { transform: translateY(-40px) scale(1.05); opacity: 0.25; }
+  0%,100% { transform: translateY(0) scale(1); opacity: 0.06; }
+  50%      { transform: translateY(-40px) scale(1.05); opacity: 0.12; }
 }
 .bg-orb {
   position: fixed;
@@ -143,4 +93,21 @@ input:focus, textarea:focus { outline: none; }
 }
 .quest-card:active {
   transform: scale(0.98);
+}
+
+/* ── Task strikethrough (completed daily tasks) ──────────── */
+.task-completed {
+  position: relative;
+  opacity: 0.45;
+}
+.task-completed::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 2px;
+  background: #8b2020;
+  transform: translateY(-50%);
+  pointer-events: none;
 }

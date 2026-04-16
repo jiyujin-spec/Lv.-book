@@ -1,41 +1,41 @@
 import type { Difficulty, StatItem } from '@/types/game';
 
-// ─── Default Stats ────────────────────────────────────────────────────────────
+// ─── Default Stats (grimoire muted palette) ──────────────────────────────────
 export const DEFAULT_STATS: StatItem[] = [
   {
     id: 'vigor',
     englishName: 'Vigor',
     japaneseDescription: '活力・体力',
     xp: 0,
-    color: '#ef4444',
+    color: '#9a4535',
   },
   {
     id: 'intellect',
     englishName: 'Intellect',
     japaneseDescription: '知能・知識',
     xp: 0,
-    color: '#3b82f6',
+    color: '#3a6a8a',
   },
   {
     id: 'social',
     englishName: 'Social',
     japaneseDescription: '対人・人間関係',
     xp: 0,
-    color: '#22c55e',
+    color: '#4a7a4a',
   },
   {
     id: 'fortune',
     englishName: 'Fortune',
     japaneseDescription: 'ビジネス・実績',
     xp: 0,
-    color: '#f59e0b',
+    color: '#a88040',
   },
   {
     id: 'will',
     englishName: 'Will',
     japaneseDescription: 'マインド・精神',
     xp: 0,
-    color: '#a855f7',
+    color: '#6a3a5a',
   },
 ];
 
@@ -60,15 +60,12 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 };
 
 export const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  Easy: '#22c55e',
-  Normal: '#f59e0b',
-  Hard: '#ef4444',
+  Easy: '#5a8a4a',
+  Normal: '#a88040',
+  Hard: '#9a4535',
 };
 
 // ─── XP Calculation ───────────────────────────────────────────────────────────
-/**
- * 上昇経験値 = (難易度係数 × 実行分/60) × 集中度係数
- */
 export function calculateXP(
   difficulty: Difficulty,
   durationMinutes: number,
@@ -79,11 +76,6 @@ export function calculateXP(
 }
 
 // ─── Level System ─────────────────────────────────────────────────────────────
-/**
- * 累計必要XP to reach the given level.
- * Lv1 → 2: 5 XP
- * Lv2 → N: cumulative = 10 × (N-1)^2.2
- */
 export function requiredCumulativeXP(targetLevel: number): number {
   if (targetLevel <= 1) return 0;
   if (targetLevel === 2) return 5;
@@ -99,15 +91,15 @@ export function getLevelFromXP(totalXP: number): number {
     } else {
       break;
     }
-    if (level >= 999) break; // safety cap
+    if (level >= 999) break;
   }
   return level;
 }
 
 export interface XPProgress {
-  currentLevelXP: number;  // XP within current level
-  requiredXP: number;       // XP needed to reach next level
-  percentage: number;       // 0-100
+  currentLevelXP: number;
+  requiredXP: number;
+  percentage: number;
   totalXP: number;
   level: number;
 }
@@ -124,20 +116,24 @@ export function getXPProgress(totalXP: number): XPProgress {
 
 // ─── Radar Chart Helpers ──────────────────────────────────────────────────────
 /**
- * Returns normalized values (0-1) for the radar chart.
- * Uses the highest stat XP as the reference maximum.
- * Minimum display is 0.05 so stats are visible even at 0.
+ * Dynamic radar scale based on level.
+ * Returns the max XP value for the chart axes.
+ * At low levels, scale is tight so small gains are visible.
  */
-export function getRadarValues(stats: StatItem[]): number[] {
-  const maxXP = Math.max(...stats.map(s => s.xp), 1);
-  return stats.map(s => Math.max(0.02, s.xp / maxXP));
+export function getRadarMaxXP(level: number): number {
+  // Scale grows with level: at Lv1 max=10, Lv5 max=50, Lv10 max=150, etc.
+  return Math.max(10, requiredCumulativeXP(level + 1) * 0.6);
 }
 
 /**
- * Compute polygon points for an N-sided radar chart.
- * cx, cy = center; r = radius; values = 0-1 per axis.
- * Starts from top (−π/2) going clockwise.
+ * Returns normalized values (0-1) for the radar chart.
+ * Uses level-based dynamic scale so small XP gains are visible.
  */
+export function getRadarValues(stats: StatItem[], level: number = 1): number[] {
+  const maxXP = getRadarMaxXP(level);
+  return stats.map(s => Math.max(0.03, Math.min(1, s.xp / maxXP)));
+}
+
 export function computePolygonPoints(
   cx: number,
   cy: number,
@@ -155,9 +151,6 @@ export function computePolygonPoints(
     .join(' ');
 }
 
-/**
- * Compute grid ring polygon (all values equal to gridValue).
- */
 export function computeGridPoints(
   cx: number,
   cy: number,
@@ -195,6 +188,19 @@ export function getHeroTitle(level: number): HeroTitle {
   return title;
 }
 
+// ─── Game Day (3AM boundary) ─────────────────────────────────────────────────
+/**
+ * Returns a date string (YYYY-MM-DD) representing the "game day".
+ * Days roll over at 3:00 AM, so 2:59 AM is still the previous day.
+ */
+export function getGameDay(date: Date = new Date()): string {
+  const adjusted = new Date(date.getTime() - 3 * 60 * 60 * 1000);
+  const y = adjusted.getFullYear();
+  const m = String(adjusted.getMonth() + 1).padStart(2, '0');
+  const d = String(adjusted.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 // ─── Date Formatting ──────────────────────────────────────────────────────────
 export function formatDateTime(isoString: string): string {
   const d = new Date(isoString);
@@ -219,7 +225,6 @@ export function formatDuration(minutes: number): string {
   return m > 0 ? `${h}時間${m}分` : `${h}時間`;
 }
 
-/** Format elapsed seconds as MM:SS display string */
 export function formatElapsedTime(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);

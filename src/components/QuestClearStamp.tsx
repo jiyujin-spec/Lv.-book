@@ -9,8 +9,8 @@ interface Props {
 }
 
 /**
- * Red ornate rubber-stamp animation that slams down on screen.
- * Inspired by classic JRPG quest-clear overlays.
+ * Heavy red stamp animation — "QUEST CLEAR!" slams down with physical weight.
+ * Grimoire-themed: darker crimson, ornate borders, cross-hatch texture.
  * pointer-events: none — never blocks interaction underneath.
  */
 export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
@@ -21,7 +21,6 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
       setPhase('hidden');
       return;
     }
-    // Slam in
     setPhase('impact');
     const t1 = setTimeout(() => setPhase('show'),  380);
     const t2 = setTimeout(() => setPhase('fade'),  2200);
@@ -47,26 +46,26 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
           opacity: phase === 'impact' ? 0 : 1,
           transition: phase === 'impact'
             ? 'none'
-            : 'transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.6), opacity 0.12s',
+            : 'transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.6), opacity 0.10s',
         }}
       >
-        {/* Outer ornate border */}
+        {/* Outer ornate border — deep crimson */}
         <div
           className="relative px-9 py-5"
           style={{
-            border: '5px solid #cc2200',
+            border: '5px solid #8b2020',
             boxShadow: [
-              '0 0 0 2px rgba(204,34,0,0.25)',
-              '0 0 40px rgba(204,34,0,0.55)',
-              'inset 0 0 25px rgba(204,34,0,0.08)',
+              '0 0 0 2px rgba(139,32,32,0.3)',
+              '0 0 50px rgba(139,32,32,0.6)',
+              'inset 0 0 30px rgba(139,32,32,0.1)',
             ].join(','),
           }}
         >
           {/* Corner ornaments */}
-          <div className="absolute top-0 left-0 w-5 h-5 border-t-4 border-l-4" style={{ borderColor: '#aa1800' }} />
-          <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4" style={{ borderColor: '#aa1800' }} />
-          <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4" style={{ borderColor: '#aa1800' }} />
-          <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4" style={{ borderColor: '#aa1800' }} />
+          <div className="absolute top-0 left-0 w-5 h-5 border-t-4 border-l-4" style={{ borderColor: '#6a1818' }} />
+          <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4" style={{ borderColor: '#6a1818' }} />
+          <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4" style={{ borderColor: '#6a1818' }} />
+          <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4" style={{ borderColor: '#6a1818' }} />
 
           {/* Corner dot accents */}
           {[[2,2],[2,-2],[-2,2],[-2,-2]].map(([t,l],i) => (
@@ -74,7 +73,7 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
               key={i}
               className="absolute w-1.5 h-1.5 rounded-full"
               style={{
-                background: '#cc2200',
+                background: '#8b2020',
                 top: t > 0 ? t + 6 : undefined,
                 bottom: t < 0 ? Math.abs(t) + 6 : undefined,
                 left: l > 0 ? l + 6 : undefined,
@@ -87,14 +86,14 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
           <div
             className="absolute inset-0 opacity-10"
             style={{
-              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(204,34,0,0.5) 3px, rgba(204,34,0,0.5) 4px)',
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(139,32,32,0.5) 3px, rgba(139,32,32,0.5) 4px)',
             }}
           />
 
           {/* Inner border ring */}
           <div
             className="absolute inset-2"
-            style={{ border: '1px solid rgba(204,34,0,0.3)' }}
+            style={{ border: '1px solid rgba(139,32,32,0.35)' }}
           />
 
           {/* Text */}
@@ -104,8 +103,8 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
               style={{
                 fontSize: 38,
                 lineHeight: 1.0,
-                color: '#cc2200',
-                textShadow: '0 0 20px rgba(204,34,0,0.7), 2px 2px 0 rgba(0,0,0,0.2)',
+                color: '#8b2020',
+                textShadow: '0 0 20px rgba(139,32,32,0.7), 2px 2px 0 rgba(0,0,0,0.3)',
                 letterSpacing: '0.22em',
               }}
             >
@@ -116,8 +115,8 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
               style={{
                 fontSize: 38,
                 lineHeight: 1.05,
-                color: '#cc2200',
-                textShadow: '0 0 20px rgba(204,34,0,0.7), 2px 2px 0 rgba(0,0,0,0.2)',
+                color: '#8b2020',
+                textShadow: '0 0 20px rgba(139,32,32,0.7), 2px 2px 0 rgba(0,0,0,0.3)',
                 letterSpacing: '0.18em',
               }}
             >
@@ -128,9 +127,9 @@ export default function QuestClearStamp({ visible, xpGained, onDone }: Props) {
                 className="font-cinzel font-bold mt-1.5"
                 style={{
                   fontSize: 17,
-                  color: '#cc2200',
+                  color: '#8b2020',
                   letterSpacing: '0.12em',
-                  textShadow: '0 0 10px rgba(204,34,0,0.5)',
+                  textShadow: '0 0 10px rgba(139,32,32,0.5)',
                 }}
               >
                 +{xpGained.toFixed(1)} XP

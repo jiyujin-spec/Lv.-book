@@ -59,6 +59,8 @@ export interface GameData {
   questHistory: QuestRecord[];
   logEntries: LogEntry[];
   soundEnabled: boolean;
+  /** Maps presetQuest.id → game day string (YYYY-MM-DD) for daily task completion tracking */
+  dailyCompletions: Record<string, string>;
 }
 
 export interface ActiveQuest {

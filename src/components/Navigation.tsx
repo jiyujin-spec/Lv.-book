@@ -27,13 +27,13 @@ export default function Navigation() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-40"
       style={{
-        background: '#04091a',
-        borderTop: '2px solid rgba(184,204,224,0.25)',
+        background: '#0d0b08',
+        borderTop: '2px solid rgba(107,93,63,0.4)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
       {/* Inner double-border line */}
-      <div style={{ borderTop: '1px solid rgba(184,204,224,0.12)', display: 'flex' }}>
+      <div style={{ borderTop: '1px solid rgba(107,93,63,0.15)', display: 'flex' }}>
         {NAV_ITEMS.map(item => {
           const isActive = current === item.screen ||
             (item.screen === 'tavern' && current === 'questCreate');
@@ -53,16 +53,16 @@ export default function Navigation() {
                   className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full"
                   style={{
                     width: 32,
-                    background: 'linear-gradient(90deg, transparent, #f0c030, transparent)',
-                    boxShadow: '0 0 6px #f0c030',
+                    background: 'linear-gradient(90deg, transparent, #c4a35a, transparent)',
+                    boxShadow: '0 0 6px rgba(196,163,90,0.5)',
                   }}
                 />
               )}
 
               {/* Icon */}
               <span style={{
-                color: isActive ? '#f0c030' : '#1e3050',
-                filter: isActive ? 'drop-shadow(0 0 5px #f0c030)' : undefined,
+                color: isActive ? '#c4a35a' : '#3a3428',
+                filter: isActive ? 'drop-shadow(0 0 4px rgba(196,163,90,0.5))' : undefined,
                 transition: 'color 0.2s, filter 0.2s',
               }}>
                 {item.icon}
@@ -74,7 +74,7 @@ export default function Navigation() {
                 style={{
                   fontSize: 9,
                   letterSpacing: '0.06em',
-                  color: isActive ? '#f0c030' : '#1e3050',
+                  color: isActive ? '#c4a35a' : '#3a3428',
                   transition: 'color 0.2s',
                 }}
               >

@@ -28,11 +28,11 @@ export default function MainScreen() {
   return (
     <div
       className="fixed inset-0 flex flex-col overflow-hidden"
-      style={{ background: '#04091a' }}
+      style={{ background: '#0d0b08' }}
     >
-      {/* Ambient orbs */}
-      <div className="bg-orb" style={{ width: 300, height: 300, background: '#1020a0', top: -80, left: -60, animationDelay: '0s' }} />
-      <div className="bg-orb" style={{ width: 200, height: 200, background: '#301060', bottom: 60, right: -40, animationDelay: '4s' }} />
+      {/* Ambient orbs — warm */}
+      <div className="bg-orb" style={{ width: 300, height: 300, background: '#2a1808', top: -80, left: -60, animationDelay: '0s' }} />
+      <div className="bg-orb" style={{ width: 200, height: 200, background: '#1a1208', bottom: 60, right: -40, animationDelay: '4s' }} />
       <ParticleEffect count={18} />
 
       {/* ── Scrollable body ── */}
@@ -40,10 +40,10 @@ export default function MainScreen() {
 
         {/* ── Title bar ── */}
         <div className="text-center pt-5 pb-4">
-          <h1 className="font-cinzel text-lg font-bold tracking-[0.35em]" style={{ color: '#f0c030' }}>
+          <h1 className="font-cinzel text-lg font-bold tracking-[0.35em]" style={{ color: '#c4a35a' }}>
             ◆ Lv. BOOK ◆
           </h1>
-          <p className="font-cinzel text-xs tracking-[0.25em] mt-0.5" style={{ color: '#4a6080' }}>
+          <p className="font-cinzel text-xs tracking-[0.25em] mt-0.5" style={{ color: '#6a6050' }}>
             冒険の書
           </p>
         </div>
@@ -52,24 +52,24 @@ export default function MainScreen() {
         <DQWindow className="mb-4">
           {/* Hero name + title + level */}
           <div className="text-center mb-4">
-            <p className="text-xl font-bold" style={{ color: '#e8f0f8', fontFamily: 'Cinzel, serif', letterSpacing: '0.05em' }}>
+            <p className="text-xl font-bold" style={{ color: '#d4cfc0', fontFamily: 'Cinzel, serif', letterSpacing: '0.05em' }}>
               {data.userName}
             </p>
-            <p className="text-xs mt-1 font-cinzel" style={{ color: '#7090b0', letterSpacing: '0.15em' }}>
+            <p className="text-xs mt-1 font-cinzel" style={{ color: '#8a7e6b', letterSpacing: '0.15em' }}>
               {heroTitle.subtitle}
             </p>
             <div className="flex items-center justify-center gap-3 mt-3">
               <div
                 className="flex items-baseline gap-1 px-4 py-1.5 rounded"
-                style={{ background: '#010810', border: '1px solid #b8cce0' }}
+                style={{ background: '#0a0806', border: '1px solid #6b5d3f' }}
               >
-                <span className="font-cinzel text-xs" style={{ color: '#7090b0' }}>Lv.</span>
-                <span className="font-cinzel text-3xl font-bold leading-none" style={{ color: '#ffd700' }}>
+                <span className="font-cinzel text-xs" style={{ color: '#8a7e6b' }}>Lv.</span>
+                <span className="font-cinzel text-3xl font-bold leading-none" style={{ color: '#d4a854' }}>
                   {data.level}
                 </span>
               </div>
               <div>
-                <p className="text-sm font-bold font-cinzel" style={{ color: '#b8cce0' }}>
+                <p className="text-sm font-bold font-cinzel" style={{ color: '#b8a88a' }}>
                   {heroTitle.title}
                 </p>
               </div>
@@ -80,7 +80,7 @@ export default function MainScreen() {
 
           {/* XP bar */}
           <div className="mb-4">
-            <div className="flex justify-between text-xs mb-1.5" style={{ color: '#4a6080' }}>
+            <div className="flex justify-between text-xs mb-1.5" style={{ color: '#6a6050' }}>
               <span className="font-cinzel">EXP</span>
               <span>{progress.currentLevelXP.toFixed(1)} / {progress.requiredXP}</span>
             </div>
@@ -90,7 +90,7 @@ export default function MainScreen() {
                 style={{ width: xpFilled ? `${progress.percentage}%` : '0%' }}
               />
             </div>
-            <p className="text-xs text-right mt-1" style={{ color: '#4a6080' }}>
+            <p className="text-xs text-right mt-1" style={{ color: '#6a6050' }}>
               総計 {data.totalXP.toFixed(1)} XP
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function MainScreen() {
 
           {/* ── Stat list with bars ── */}
           <div>
-            <p className="font-cinzel text-xs text-center mb-3" style={{ color: '#4a6080', letterSpacing: '0.2em' }}>
+            <p className="font-cinzel text-xs text-center mb-3" style={{ color: '#6a6050', letterSpacing: '0.2em' }}>
               ステータス
             </p>
             <div className="space-y-3">
@@ -111,16 +111,16 @@ export default function MainScreen() {
                       <div className="flex items-center gap-2">
                         <div
                           className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ background: stat.color, boxShadow: `0 0 5px ${stat.color}` }}
+                          style={{ background: stat.color, boxShadow: `0 0 4px ${stat.color}` }}
                         />
                         <span className="font-cinzel text-xs font-bold" style={{ color: stat.color }}>
                           {stat.englishName}
                         </span>
-                        <span className="text-xs" style={{ color: '#4a6080', fontSize: 10 }}>
+                        <span className="text-xs" style={{ color: '#6a6050', fontSize: 10 }}>
                           {stat.japaneseDescription}
                         </span>
                       </div>
-                      <span className="text-xs font-bold ml-2" style={{ color: '#e8f0f8', whiteSpace: 'nowrap' }}>
+                      <span className="text-xs font-bold ml-2" style={{ color: '#d4cfc0', whiteSpace: 'nowrap' }}>
                         {stat.xp.toFixed(1)}
                       </span>
                     </div>
@@ -130,7 +130,7 @@ export default function MainScreen() {
                         style={{
                           width: xpFilled ? `${ratio * 100}%` : '0%',
                           background: stat.color,
-                          boxShadow: `0 0 6px ${stat.color}80`,
+                          boxShadow: `0 0 4px ${stat.color}60`,
                           opacity: 0.85,
                         }}
                       />
@@ -145,7 +145,7 @@ export default function MainScreen() {
         {/* ── Radar chart — full width, responsive ── */}
         <DQWindow title="勇者の石版" className="mb-4">
           <div style={{ maxWidth: 340, margin: '0 auto' }}>
-            <RadarChart stats={data.stats} animate />
+            <RadarChart stats={data.stats} level={data.level} animate />
           </div>
         </DQWindow>
 
@@ -172,12 +172,12 @@ export default function MainScreen() {
                   <div key={q.id} className="flex items-center gap-2 text-xs">
                     <div
                       className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: stat?.color ?? '#4080e0' }}
+                      style={{ background: stat?.color ?? '#a88040' }}
                     />
-                    <span className="flex-1 truncate" style={{ color: '#b8cce0' }}>
+                    <span className="flex-1 truncate" style={{ color: '#b8a88a' }}>
                       {q.questName}
                     </span>
-                    <span className="flex-shrink-0 font-cinzel font-bold" style={{ color: '#f0c030' }}>
+                    <span className="flex-shrink-0 font-cinzel font-bold" style={{ color: '#c4a35a' }}>
                       +{q.xpGained.toFixed(1)}
                     </span>
                   </div>
