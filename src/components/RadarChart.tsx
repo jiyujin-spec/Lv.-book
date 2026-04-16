@@ -14,7 +14,7 @@ interface RadarChartProps {
 export default function RadarChart({ stats, level = 1, vbSize = 260, animate = true }: RadarChartProps) {
   const cx = vbSize / 2;
   const cy = vbSize / 2;
-  const r  = (vbSize / 2) * 0.68;
+  const r  = (vbSize / 2) * 0.60;
   const n  = stats.length;
 
   // Dynamic scale based on level
@@ -41,7 +41,7 @@ export default function RadarChart({ stats, level = 1, vbSize = 260, animate = t
   return (
     <svg
       viewBox={`0 0 ${vbSize} ${vbSize}`}
-      style={{ width: '100%', height: 'auto', display: 'block' }}
+      style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
       className={animate ? 'animate-fade-in-up' : ''}
     >
       <defs>

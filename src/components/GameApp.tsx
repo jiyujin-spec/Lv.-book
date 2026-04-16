@@ -16,12 +16,12 @@ export default function GameApp() {
 
   if (!state.isLoaded) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#04091a' }}>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#0d0b08' }}>
         <div className="text-center">
-          <div className="text-5xl mb-4 animate-float" style={{ filter: 'drop-shadow(0 0 16px #4080e0)' }}>
+          <div className="text-5xl mb-4 animate-float" style={{ filter: 'drop-shadow(0 0 16px rgba(196,163,90,0.3))' }}>
             📖
           </div>
-          <p className="font-cinzel text-xs tracking-[0.4em] animate-pulse" style={{ color: '#1e3050' }}>
+          <p className="font-cinzel text-xs tracking-[0.4em] animate-pulse" style={{ color: '#3a3428' }}>
             LOADING...
           </p>
         </div>

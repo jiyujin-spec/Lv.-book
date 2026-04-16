@@ -5,6 +5,7 @@ import React, {
   useContext,
   useReducer,
   useEffect,
+  useRef,
   useCallback,
   type ReactNode,
 } from 'react';
@@ -12,9 +13,7 @@ import type {
   GameData, ActiveQuest, QuestResult, Screen,
   StatItem, Difficulty, PresetQuest, QuestRecord,
 } from '@/types/game';
-import {
-  loadGameData, saveGameData, clearGameData, INITIAL_GAME_DATA,
-} from '@/lib/storage';
+import { INITIAL_GAME_DATA, migrateGameData } from '@/lib/storage';
 import {
   calculateXP, getLevelFromXP, generateId, TASK_XP, getGameDay,
 } from '@/lib/gameLogic';
@@ -257,7 +256,6 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case 'CLEAR_DATA': {
-      clearGameData();
       return { ...initialState, data: { ...INITIAL_GAME_DATA }, screen: 'prologue', isLoaded: true };
     }
 
@@ -293,17 +291,43 @@ interface GameContextValue {
 
 const GameContext = createContext<GameContextValue | null>(null);
 
-export function GameProvider({ children }: { children: ReactNode }) {
+export function GameProvider({ children, userId }: { children: ReactNode; userId?: string }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Load from API on mount ─────────────────────────────────────────────────
   useEffect(() => {
-    const data = loadGameData();
-    dispatch({ type: 'LOAD', payload: data });
-    soundEngine.setEnabled(data.soundEnabled);
-  }, []);
+    async function loadFromApi() {
+      try {
+        const res = await fetch('/api/game-data');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const raw = await res.json();
+        const data = raw ? migrateGameData(raw) : { ...INITIAL_GAME_DATA };
+        dispatch({ type: 'LOAD', payload: data });
+        soundEngine.setEnabled(data.soundEnabled);
+      } catch (err) {
+        console.error('[GameProvider] load failed', err);
+        dispatch({ type: 'LOAD', payload: { ...INITIAL_GAME_DATA } });
+      }
+    }
+    loadFromApi();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
+  // ── Debounced save to API ──────────────────────────────────────────────────
   useEffect(() => {
-    if (state.isLoaded) saveGameData(state.data);
+    if (!state.isLoaded) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      fetch('/api/game-data', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state.data),
+      }).catch(err => console.error('[GameProvider] save failed', err));
+    }, 1000);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
   }, [state.data, state.isLoaded]);
 
   const navigate = useCallback((s: Screen) => dispatch({ type: 'SET_SCREEN', payload: s }), []);

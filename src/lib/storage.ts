@@ -16,19 +16,16 @@ export const INITIAL_GAME_DATA: GameData = {
   dailyCompletions: {},
 };
 
-export function loadGameData(): GameData {
-  if (typeof window === 'undefined') return INITIAL_GAME_DATA;
+/** Migrate raw (potentially partial) game data from any source into a valid GameData object. */
+export function migrateGameData(raw: unknown): GameData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...INITIAL_GAME_DATA };
-    const parsed = JSON.parse(raw) as Partial<GameData> & {
+    const parsed = raw as Partial<GameData> & {
       presetQuests?: (Partial<PresetQuest> & Record<string, unknown>)[];
       questHistory?: (Partial<QuestRecord> & Record<string, unknown>)[];
     };
     return {
       ...INITIAL_GAME_DATA,
       ...parsed,
-      // Migrate: ensure every preset has questType
       presetQuests: (parsed.presetQuests ?? []).map(q => ({
         id: q.id ?? '',
         name: q.name ?? '',
@@ -37,7 +34,6 @@ export function loadGameData(): GameData {
         questType: (q.questType as PresetQuest['questType']) ?? 'time',
         createdAt: q.createdAt ?? new Date().toISOString(),
       })),
-      // Migrate: ensure every history record has questType
       questHistory: (parsed.questHistory ?? []).map(q => ({
         id: q.id ?? '',
         questName: q.questName ?? '',
@@ -53,6 +49,17 @@ export function loadGameData(): GameData {
       dailyCompletions: (parsed.dailyCompletions as Record<string, string>) ?? {},
       level: getLevelFromXP(parsed.totalXP ?? 0),
     };
+  } catch {
+    return { ...INITIAL_GAME_DATA };
+  }
+}
+
+export function loadGameData(): GameData {
+  if (typeof window === 'undefined') return INITIAL_GAME_DATA;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...INITIAL_GAME_DATA };
+    return migrateGameData(JSON.parse(raw));
   } catch {
     return { ...INITIAL_GAME_DATA };
   }

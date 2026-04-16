@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Plus, Trash2, Play, X, Check, Timer, CheckSquare } from 'lucide-react';
+import { Plus, Trash2, Play, X, Check, Timer, CheckSquare, Beer } from 'lucide-react';
 import type { PresetQuest, ActiveQuest, Difficulty } from '@/types/game';
 import { DIFFICULTY_COLORS, TASK_XP } from '@/lib/gameLogic';
 import { useGame } from '@/contexts/GameContext';
@@ -107,7 +107,9 @@ export default function TavernScreen() {
 
         {presets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="text-5xl mb-5 animate-float">🏰</div>
+            <div className="mb-5 animate-float" style={{ filter: 'drop-shadow(0 0 10px rgba(196,163,90,0.25))' }}>
+              <Beer size={52} style={{ color: '#c4a35a' }} />
+            </div>
             <DQWindow className="w-full">
               <p className="text-sm mb-1" style={{ color: '#8a7e6b', fontFamily: 'serif' }}>
                 まだクエストがない
