@@ -40,6 +40,7 @@ export default function QuestScreen() {
       statId: stat.id,
       statEnglishName: stat.englishName,
       difficulty,
+      questType: 'time',
       durationMinutes: effectiveDuration,
       startedAt: Date.now(),
     };

@@ -46,6 +46,13 @@ export const DIFFICULTY_COEFFICIENT: Record<Difficulty, number> = {
   Hard: 15,
 };
 
+/** Fixed XP for task-type quests (no time component) */
+export const TASK_XP: Record<Difficulty, number> = {
+  Easy: 2,
+  Normal: 5,
+  Hard: 10,
+};
+
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   Easy: '易 Easy',
   Normal: '普 Normal',
@@ -200,10 +207,27 @@ export function formatDateTime(isoString: string): string {
 }
 
 export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes}分`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  if (minutes <= 0) return '0秒';
+  if (minutes < 1) {
+    const secs = Math.round(minutes * 60);
+    return `${secs}秒`;
+  }
+  const totalMins = Math.round(minutes);
+  if (totalMins < 60) return `${totalMins}分`;
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
   return m > 0 ? `${h}時間${m}分` : `${h}時間`;
+}
+
+/** Format elapsed seconds as MM:SS display string */
+export function formatElapsedTime(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) {
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 export function generateId(): string {

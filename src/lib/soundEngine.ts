@@ -18,7 +18,7 @@ class SoundEngine {
         (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       )();
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.55;
+      this.masterGain.gain.value = 0.825;
       this.masterGain.connect(this.ctx.destination);
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -80,14 +80,17 @@ class SoundEngine {
     source.start(startTime);
   }
 
-  // ── Writing noise ─────────────────────────────────────────────────────────
+  // ── Feather pen on parchment ──────────────────────────────────────────────
   playWriting() {
     if (!this.enabled) return;
     const ctx = this.getCtx(); if (!ctx) return;
     const t = ctx.currentTime;
-    this.noise(t, 0.06, 0.12, 1200);
-    this.noise(t + 0.07, 0.05, 0.08, 1500);
-    this.noise(t + 0.13, 0.04, 0.07, 1000);
+    // High-frequency scratchy bursts — quill on parchment
+    this.noise(t,        0.04, 0.14, 3200);
+    this.noise(t + 0.05, 0.03, 0.10, 4500);
+    this.noise(t + 0.10, 0.04, 0.12, 2800);
+    this.noise(t + 0.15, 0.025, 0.09, 3800);
+    this.noise(t + 0.19, 0.03, 0.11, 3400);
   }
 
   // ── Retro cursor/click ────────────────────────────────────────────────────

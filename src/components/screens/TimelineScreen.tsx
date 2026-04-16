@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ScrollText, Flame, Star, TrendingUp } from 'lucide-react';
+import { ScrollText, Flame, Star, TrendingUp, Timer, CheckSquare } from 'lucide-react';
 import { formatDateTime, formatDuration, DIFFICULTY_COLORS } from '@/lib/gameLogic';
 import { useGame } from '@/contexts/GameContext';
 import DQWindow from '../DQWindow';
@@ -46,8 +46,13 @@ export default function TimelineScreen() {
         <div className="grid grid-cols-3 gap-3">
           {[
             { icon: <Star size={15} />, label: '総クエスト', value: `${data.questHistory.length}回` },
-            { icon: <Flame size={15} />, label: '総時間',
-              value: totalTime >= 60 ? `${Math.floor(totalTime/60)}h${totalTime%60}m` : `${totalTime}m` },
+            {
+              icon: <Flame size={15} />,
+              label: '総時間',
+              value: totalTime >= 60
+                ? `${Math.floor(totalTime/60)}h${Math.round(totalTime%60)}m`
+                : `${Math.round(totalTime)}m`,
+            },
             { icon: <TrendingUp size={15} />, label: '最高XP', value: `${bestXP.toFixed(1)}` },
           ].map((s, i) => (
             <DQWindow key={i} className="text-center">
@@ -61,7 +66,7 @@ export default function TimelineScreen() {
         {/* Stat filter chips */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           {['all', ...data.stats.map(s => s.id)].map(f => {
-            const stat = f !== 'all' ? data.stats.find(s => s.id === f) : null;
+            const stat   = f !== 'all' ? data.stats.find(s => s.id === f) : null;
             const active = filter === f;
             return (
               <button
@@ -92,11 +97,13 @@ export default function TimelineScreen() {
         ) : (
           <div className="space-y-3">
             {filtered.map(q => {
-              const stat = data.stats.find(s => s.id === q.statId);
+              const stat      = data.stats.find(s => s.id === q.statId);
               const diffColor = DIFFICULTY_COLORS[q.difficulty];
+              const isTime    = (q.questType ?? 'time') === 'time';
+
               return (
                 <DQWindow key={q.id}>
-                  {/* Color accent */}
+                  {/* Color accent bar */}
                   <div
                     className="absolute top-3 left-0 w-1 h-8 rounded-r-sm"
                     style={{ background: stat?.color ?? '#4080e0' }}
@@ -118,26 +125,51 @@ export default function TimelineScreen() {
                         <p className="font-cinzel text-xs" style={{ color: '#4a6080', fontSize: 9 }}>XP</p>
                       </div>
                     </div>
+
+                    {/* Tag row */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {[
-                        { text: stat?.englishName ?? q.statId, color: stat?.color ?? '#4080e0' },
-                        { text: q.difficulty, color: diffColor },
-                        { text: formatDuration(q.durationMinutes), color: '#4a6080' },
-                        { text: `集中${q.focusRate}×`, color: '#4a6080' },
-                      ].map((tag, i) => (
+                      {/* Stat */}
+                      <span
+                        className="font-cinzel px-1.5 py-0.5 rounded-sm"
+                        style={{ background: `${stat?.color ?? '#4080e0'}15`, border: `1px solid ${stat?.color ?? '#4080e0'}40`, color: stat?.color ?? '#4080e0', fontSize: 9 }}
+                      >
+                        {stat?.englishName ?? q.statId}
+                      </span>
+
+                      {/* Difficulty */}
+                      <span
+                        className="font-cinzel px-1.5 py-0.5 rounded-sm"
+                        style={{ background: `${diffColor}15`, border: `1px solid ${diffColor}40`, color: diffColor, fontSize: 9 }}
+                      >
+                        {q.difficulty}
+                      </span>
+
+                      {/* Quest type + duration / task label */}
+                      {isTime ? (
+                        <>
+                          <span
+                            className="font-cinzel px-1.5 py-0.5 rounded-sm flex items-center gap-0.5"
+                            style={{ background: 'rgba(64,128,224,0.10)', border: '1px solid rgba(64,128,224,0.3)', color: '#4080e0', fontSize: 9 }}
+                          >
+                            <Timer size={8} />
+                            {q.durationMinutes > 0 ? formatDuration(q.durationMinutes) + 'の冒険' : '時間形式'}
+                          </span>
+                          <span
+                            className="font-cinzel px-1.5 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(184,204,224,0.06)', border: '1px solid rgba(30,48,80,0.5)', color: '#4a6080', fontSize: 9 }}
+                          >
+                            集中{q.focusRate}×
+                          </span>
+                        </>
+                      ) : (
                         <span
-                          key={i}
-                          className="font-cinzel px-1.5 py-0.5 rounded-sm"
-                          style={{
-                            background: `${tag.color}15`,
-                            border: `1px solid ${tag.color}40`,
-                            color: tag.color,
-                            fontSize: 9,
-                          }}
+                          className="font-cinzel px-1.5 py-0.5 rounded-sm flex items-center gap-0.5"
+                          style={{ background: 'rgba(48,200,64,0.08)', border: '1px solid rgba(48,200,64,0.25)', color: '#30c840', fontSize: 9 }}
                         >
-                          {tag.text}
+                          <CheckSquare size={8} />
+                          任務遂行
                         </span>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </DQWindow>

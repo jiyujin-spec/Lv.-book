@@ -10,13 +10,13 @@ import React, {
 } from 'react';
 import type {
   GameData, ActiveQuest, QuestResult, Screen,
-  StatItem, Difficulty, PresetQuest,
+  StatItem, Difficulty, PresetQuest, QuestRecord,
 } from '@/types/game';
 import {
   loadGameData, saveGameData, clearGameData, INITIAL_GAME_DATA,
 } from '@/lib/storage';
 import {
-  calculateXP, getLevelFromXP, generateId,
+  calculateXP, getLevelFromXP, generateId, TASK_XP,
 } from '@/lib/gameLogic';
 import soundEngine from '@/lib/soundEngine';
 
@@ -45,7 +45,9 @@ type Action =
   | { type: 'SET_SCREEN'; payload: Screen }
   | { type: 'COMPLETE_PROLOGUE'; payload: { userName: string; stats: StatItem[] } }
   | { type: 'START_QUEST'; payload: ActiveQuest }
+  | { type: 'STOP_TIMER' }
   | { type: 'COMPLETE_QUEST'; payload: QuestResult }
+  | { type: 'COMPLETE_TASK_QUEST'; payload: { preset: PresetQuest; statEnglishName: string; xpGained: number } }
   | { type: 'DISMISS_LEVEL_UP' }
   | { type: 'UPDATE_USER_NAME'; payload: string }
   | { type: 'UPDATE_STATS'; payload: StatItem[] }
@@ -83,6 +85,10 @@ function reducer(state: GameState, action: Action): GameState {
     case 'START_QUEST':
       return { ...state, activeQuest: action.payload, screen: 'timer' };
 
+    case 'STOP_TIMER':
+      if (!state.activeQuest) return state;
+      return { ...state, activeQuest: { ...state.activeQuest, stoppedAt: Date.now() } };
+
     case 'COMPLETE_QUEST': {
       const result = action.payload;
       const { quest, xpGained, statXPGained } = result;
@@ -94,11 +100,16 @@ function reducer(state: GameState, action: Action): GameState {
       const newLevel = getLevelFromXP(newTotalXP);
       const didLevelUp = newLevel > state.data.level;
 
+      const durationMin = Math.round(quest.durationMinutes);
+      const questTypeText = quest.questType === 'task'
+        ? '任務遂行'
+        : `${durationMin > 0 ? durationMin : 1}分間の冒険`;
+
       const newLogs = [...state.data.logEntries];
       newLogs.unshift({
         id: generateId(),
         type: 'quest_complete',
-        message: `「${quest.questName}」クエスト完了。${quest.statEnglishName}が ${statXPGained.toFixed(1)} 上がった！`,
+        message: `「${quest.questName}」${questTypeText}を完遂。${quest.statEnglishName}が ${statXPGained.toFixed(1)} 上昇！`,
         timestamp: new Date().toISOString(),
       });
       if (didLevelUp) {
@@ -110,12 +121,13 @@ function reducer(state: GameState, action: Action): GameState {
         });
       }
 
-      const record = {
+      const record: QuestRecord = {
         id: generateId(),
         questName: quest.questName,
         statId: quest.statId,
         statEnglishName: quest.statEnglishName,
         difficulty: quest.difficulty,
+        questType: quest.questType ?? 'time',
         durationMinutes: quest.durationMinutes,
         focusRate: result.focusRate,
         xpGained,
@@ -139,6 +151,58 @@ function reducer(state: GameState, action: Action): GameState {
         showLevelUp: didLevelUp,
         screen: 'result',
       };
+    }
+
+    case 'COMPLETE_TASK_QUEST': {
+      const { preset, statEnglishName, xpGained } = action.payload;
+
+      const updatedStats = state.data.stats.map(s =>
+        s.id === preset.statId ? { ...s, xp: s.xp + xpGained } : s
+      );
+      const newTotalXP = state.data.totalXP + xpGained;
+      const newLevel = getLevelFromXP(newTotalXP);
+      const didLevelUp = newLevel > state.data.level;
+
+      const newLogs = [...state.data.logEntries];
+      newLogs.unshift({
+        id: generateId(),
+        type: 'quest_complete',
+        message: `「${preset.name}」任務遂行を完遂。${statEnglishName}が ${xpGained.toFixed(1)} 上昇！`,
+        timestamp: new Date().toISOString(),
+      });
+      if (didLevelUp) {
+        newLogs.unshift({
+          id: generateId(),
+          type: 'level_up',
+          message: `Lv.${newLevel} になった！✨`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const record: QuestRecord = {
+        id: generateId(),
+        questName: preset.name,
+        statId: preset.statId,
+        statEnglishName,
+        difficulty: preset.difficulty,
+        questType: 'task',
+        durationMinutes: 0,
+        focusRate: 1.0,
+        xpGained,
+        completedAt: new Date().toISOString(),
+      };
+
+      const newData: GameData = {
+        ...state.data,
+        totalXP: newTotalXP,
+        level: newLevel,
+        stats: updatedStats,
+        questHistory: [record, ...state.data.questHistory],
+        logEntries: newLogs,
+      };
+
+      // Stay on current screen (tavern); level-up overlay handled locally in TavernScreen
+      return { ...state, data: newData };
     }
 
     case 'DISMISS_LEVEL_UP':
@@ -183,12 +247,20 @@ function reducer(state: GameState, action: Action): GameState {
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
+interface TaskQuestResult {
+  xpGained: number;
+  leveledUp: boolean;
+  newLevel: number;
+}
+
 interface GameContextValue {
   state: GameState;
   navigate: (screen: Screen) => void;
   completePrologue: (userName: string, stats: StatItem[]) => void;
   startQuest: (quest: ActiveQuest) => void;
+  stopTimer: () => void;
   completeQuest: (focusRate: number) => void;
+  completeTaskQuest: (preset: PresetQuest) => TaskQuestResult | null;
   dismissLevelUp: () => void;
   updateUserName: (name: string) => void;
   updateStats: (stats: StatItem[]) => void;
@@ -213,24 +285,42 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (state.isLoaded) saveGameData(state.data);
   }, [state.data, state.isLoaded]);
 
-  const navigate     = useCallback((s: Screen) => dispatch({ type: 'SET_SCREEN', payload: s }), []);
+  const navigate = useCallback((s: Screen) => dispatch({ type: 'SET_SCREEN', payload: s }), []);
   const completePrologue = useCallback((userName: string, stats: StatItem[]) =>
     dispatch({ type: 'COMPLETE_PROLOGUE', payload: { userName, stats } }), []);
 
-  const startQuest   = useCallback((quest: ActiveQuest) => {
+  const startQuest = useCallback((quest: ActiveQuest) => {
     dispatch({ type: 'START_QUEST', payload: quest });
     soundEngine.playQuestStart();
+  }, []);
+
+  const stopTimer = useCallback(() => {
+    dispatch({ type: 'STOP_TIMER' });
   }, []);
 
   const completeQuest = useCallback((focusRate: number) => {
     const { activeQuest, data } = state;
     if (!activeQuest) return;
-    const xpGained = calculateXP(activeQuest.difficulty as Difficulty, activeQuest.durationMinutes, focusRate);
+
+    let xpGained: number;
+    let durationMinutes: number;
+
+    if (activeQuest.questType === 'task') {
+      xpGained = TASK_XP[activeQuest.difficulty as Difficulty];
+      durationMinutes = 0;
+    } else {
+      // time quest: use stoppedAt for accurate elapsed time
+      const endTime = activeQuest.stoppedAt ?? Date.now();
+      durationMinutes = (endTime - activeQuest.startedAt) / 60000;
+      xpGained = calculateXP(activeQuest.difficulty as Difficulty, durationMinutes, focusRate);
+    }
+
     const statXPGained = xpGained;
     const newTotalXP = data.totalXP + xpGained;
-    const newLevel   = getLevelFromXP(newTotalXP);
+    const newLevel = getLevelFromXP(newTotalXP);
+
     const result: QuestResult = {
-      quest: activeQuest,
+      quest: { ...activeQuest, durationMinutes },
       focusRate,
       xpGained,
       statXPGained,
@@ -238,14 +328,37 @@ export function GameProvider({ children }: { children: ReactNode }) {
       newLevel,
       oldLevel: data.level,
     };
+
     dispatch({ type: 'COMPLETE_QUEST', payload: result });
     soundEngine.playQuestComplete();
     if (newLevel > data.level) setTimeout(() => soundEngine.playLevelUp(), 800);
   }, [state]);
 
+  const completeTaskQuest = useCallback((preset: PresetQuest): TaskQuestResult | null => {
+    const stat = state.data.stats.find(s => s.id === preset.statId);
+    if (!stat) return null;
+
+    const xpGained = TASK_XP[preset.difficulty];
+    const newTotalXP = state.data.totalXP + xpGained;
+    const newLevel = getLevelFromXP(newTotalXP);
+    const leveledUp = newLevel > state.data.level;
+
+    dispatch({
+      type: 'COMPLETE_TASK_QUEST',
+      payload: { preset, statEnglishName: stat.englishName, xpGained },
+    });
+
+    // Sound: stamp + quest complete fanfare
+    soundEngine.playStamp();
+    setTimeout(() => soundEngine.playQuestComplete(), 250);
+    if (leveledUp) setTimeout(() => soundEngine.playLevelUp(), 3200);
+
+    return { xpGained, leveledUp, newLevel };
+  }, [state]);
+
   const dismissLevelUp = useCallback(() => dispatch({ type: 'DISMISS_LEVEL_UP' }), []);
-  const updateUserName = useCallback((n: string) => dispatch({ type: 'UPDATE_USER_NAME', payload: n }), []);
-  const updateStats    = useCallback((s: StatItem[]) => dispatch({ type: 'UPDATE_STATS', payload: s }), []);
+  const updateUserName  = useCallback((n: string) => dispatch({ type: 'UPDATE_USER_NAME', payload: n }), []);
+  const updateStats     = useCallback((s: StatItem[]) => dispatch({ type: 'UPDATE_STATS', payload: s }), []);
 
   const addPresetQuest = useCallback((q: PresetQuest) =>
     dispatch({ type: 'ADD_PRESET_QUEST', payload: q }), []);
@@ -257,7 +370,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   return (
     <GameContext.Provider value={{
-      state, navigate, completePrologue, startQuest, completeQuest,
+      state, navigate, completePrologue, startQuest, stopTimer,
+      completeQuest, completeTaskQuest,
       dismissLevelUp, updateUserName, updateStats,
       addPresetQuest, deletePresetQuest, toggleSound, clearData,
     }}>

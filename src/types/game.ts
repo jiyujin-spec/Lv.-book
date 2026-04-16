@@ -1,4 +1,5 @@
 export type Difficulty = 'Easy' | 'Normal' | 'Hard';
+export type QuestType = 'time' | 'task';
 export type Screen =
   | 'prologue'
   | 'main'
@@ -24,7 +25,7 @@ export interface PresetQuest {
   name: string;
   statId: string;
   difficulty: Difficulty;
-  durationMinutes: number;
+  questType: QuestType;
   createdAt: string;
 }
 
@@ -34,6 +35,7 @@ export interface QuestRecord {
   statId: string;
   statEnglishName: string;
   difficulty: Difficulty;
+  questType: QuestType;
   durationMinutes: number;
   focusRate: number;
   xpGained: number;
@@ -64,8 +66,10 @@ export interface ActiveQuest {
   statId: string;
   statEnglishName: string;
   difficulty: Difficulty;
-  durationMinutes: number;
-  startedAt: number;
+  questType: QuestType;
+  durationMinutes: number;  // 0 at start; elapsed minutes at stop (time quests)
+  startedAt: number;        // Date.now() when quest started
+  stoppedAt?: number;       // Date.now() when stopwatch stopped (time quests only)
 }
 
 export interface QuestResult {
